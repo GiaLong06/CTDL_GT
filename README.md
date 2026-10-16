@@ -16,7 +16,7 @@
 ### Các bước biên dịch bằng Terminal (GCC)
 1. Di chuyển vào thư mục chứa mã nguồn:
    ```bash
-   cd CTDL_GT_Nhom4
+   cd CTDL_GT
    ```
 2. Biên dịch chương trình:
    ```bash
