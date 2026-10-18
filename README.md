@@ -30,7 +30,7 @@
 *Ghi chú cho giảng viên: Tiến độ đóng góp thực tế được phản ánh chi tiết qua Commit History của từng tài khoản thành viên.*
 | STT | Hạng mục công việc / Tính năng | Người phụ trách | Hạn nộp (Deadline) | Trạng thái | Tỷ lệ đóng góp |
 |:---:|--------------------------------|:---------------:|:------------------:|:----------:|:--------------:|
-| 1   | Khởi tạo & Quản lý bộ nhớ & Gộp code| Hoàng Hà Hạnh Ngân  | /10/2026 | **Done** | 100% |
+| 1   | Khởi tạo & Quản lý bộ nhớ & Gộp code| Hoàng Hà Hạnh Ngân  | 17/10/2026 | **Done** | 100% |
 | 2   | Thao Tác Cơ Bản (Thêm & Xóa) | Nguyễn Thị Thanh Hà | 17/10/2026 | **Done** | 100% |
 | 3   | Thuật Toán (Sắp Xếp & Tìm Kiếm) | Võ Gia Long | 17/10/2026 | **Done** | 100% |
 | 4   | Duyệt Danh Bạ & Đọc/Ghi File | Ứng Thành Nam | 17/10/2026 | **Done** | 100% |
