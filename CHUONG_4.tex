@@ -1,0 +1,284 @@
+\documentclass[12pt,a4paper]{report}
+
+% Thư viện tiếng Việt và định dạng
+\usepackage[utf8]{vietnam}
+\usepackage[utf8]{inputenc}
+\usepackage{tabularx}
+\usepackage{float}
+\usepackage{array}
+% Thư viện toán học, hình ảnh, bảng biểu và liên kết
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{graphicx}
+\usepackage{array}
+\usepackage[hidelinks]{hyperref}
+\usepackage{geometry}
+\geometry{margin=2.5cm}
+
+\title{CTDL - Đánh Giá \& Kết Quả Thử Nghiệm}
+\author{Ung Thanh Nam}
+\date{October 2026}
+
+\begin{document}
+\maketitle
+\tableofcontents
+\newpage
+
+% Nhúng nội dung các chương
+\input{chap4_ket_qua}
+\newpage
+\input{phu_luc}
+
+\setcounter{chapter}{3}
+\chapter{Đánh Giá, Kết Quả Thử Nghiệm và Kết Luận}
+\label{chap:ket_qua_ket_luan}
+
+\section{Đánh giá độ phức tạp thuật toán}
+\label{sec:do_phuc_tap}
+
+Trong chương trình C++, các thao tác cốt lõi bao gồm thêm (Insert), xóa (Delete), sắp xếp (Sort) và tìm kiếm tiền tố (Prefix Search) được tối ưu hóa dựa trên cấu trúc dữ liệu cây Tiền tố (Trie) kết hợp với các thuật toán sắp xếp chuẩn của C++ Standard Template Library (STL).
+
+Dưới đây là các ký hiệu đại diện cho thông số dữ liệu:
+\begin{itemize}
+    \item $N$: Tổng số bản ghi/từ khóa có trong hệ thống.
+    \item $L$: Độ dài trung bình của từ khóa/tiền tố cần thao tác.
+    \item $K$: Số lượng bản ghi tìm thấy thỏa mãn điều kiện tiền tố ($K \le N$).
+    \item $\vert{}\Sigma\vert{}$: Kích thước bảng chữ cái (đối với bảng mã ASCII mở rộng hoặc UTF-8 mã hóa, $\vert{}\Sigma\vert{} \approx 256$).
+\end{itemize}
+
+\subsection{Phân tích độ phức tạp thời gian (Time Complexity)}
+
+\begin{enumerate}
+    \item \textbf{Thao tác Thêm (Insert):}
+    \begin{itemize}
+        \item \textit{Độ phức tạp:} $\mathcal{O}(L)$.
+        \item \textit{Giải thích:} Thuật toán duyệt qua từng ký tự của chuỗi đầu vào có độ dài $L$. Tại mỗi nút, nếu liên kết chưa tồn tại, hệ thống khởi tạo nút mới trong thời gian $\mathcal{O}(1)$. Quá trình lặp dừng lại sau đúng $L$ bước, hoàn toàn độc lập với tổng số phần tử $N$ hiện có trong hệ thống.
+    \end{itemize}
+
+    \item \textbf{Thao tác Xóa (Delete):}
+    \begin{itemize}
+        \item \textit{Độ phức tạp:} $\mathcal{O}(L)$.
+        \item \textit{Giải thích:} Duyệt đệ quy xuống theo chiều sâu của chuỗi độ dài $L$ để đánh dấu hủy bỏ trạng thái kết thúc từ (`isEndOfWord = false`). Nếu nút lá không còn con nào khác, tiến hành thu hồi bộ nhớ theo hướng từ dưới lên trong đúng $L$ bước.
+    \end{itemize}
+
+    \item \textbf{Thao tác Tìm kiếm tiền tố (Prefix Search):}
+    \begin{itemize}
+        \item \textit{Độ phức tạp:} $\mathcal{O}(L + K \cdot L)$.
+        \item \textit{Giải thích:} Quá trình gồm 2 giai đoạn:
+        \begin{enumerate}
+            \item Định vị nút gốc của tiền tố: Mất thời gian $\mathcal{O}(L)$ để đi từ nút gốc (Root) đến nút đại diện cho ký tự cuối của tiền tố.
+            \item Duyệt cây con (DFS/BFS) thu thập $K$ kết quả: Mất $\mathcal{O}(K \cdot L)$ để truy xuất toàn bộ danh sách chuỗi hoàn chỉnh tương ứng.
+        \end{enumerate}
+    \end{itemize}
+
+    \item \textbf{Thao tác Sắp xếp kết quả (Sort):}
+    \begin{itemize}
+        \item \textit{Độ phức tạp:} $\mathcal{O}(K \cdot \log K \cdot L)$.
+        \item \textit{Giải thích:} Sau khi tìm kiếm được $K$ phần tử phù hợp với tiền tố, hệ thống áp dụng thuật toán `std::sort` (Introsort - kết hợp Quicksort, Heapsort và Insertion Sort). Việc so sánh hai chuỗi ký tự tốn chi phí tối đa $\mathcal{O}(L)$, dẫn đến tổng thời gian sắp xếp là $\mathcal{O}(K \cdot \log K \cdot L)$.
+    \end{itemize}
+\end{enumerate}
+
+\subsection{Phân tích độ phức tạp không gian (Space Complexity)}
+
+\begin{itemize}
+    \item \textbf{Bộ nhớ tĩnh/Động cho Cấu trúc dữ liệu Trie:} $\mathcal{O}(N \cdot L \cdot \vert{}\Sigma\vert{})$.
+    \begin{itemize}
+        \item Trong trường hợp xấu nhất (các từ không chia sẻ tiền tố chung), số lượng nút tối đa cần cấp phát là $N \cdot L$. Mỗi nút chứa mảng con trỏ kích thước $\vert{}\Sigma\vert{}$.
+        \item Trong trường hợp thực tế (các từ có nhiều tiền tố chung), độ phức tạp không gian giảm đáng kể xuống $\mathcal{O}(N \cdot L)$ nhờ cơ chế chia sẻ nút gốc.
+    \end{itemize}
+    \item \textbf{Bộ nhớ bổ sung cho Thao tác Tìm kiếm \& Sắp xếp:} $\mathcal{O}(K \cdot L)$ để lưu trữ danh sách $K$ chuỗi kết quả tạm thời trên RAM trước khi xuất ra giao diện.
+\end{itemize}
+
+\begin{table}[htbp]
+\centering
+\caption{Bảng tổng hợp độ phức tạp của các thao tác cốt lõi}
+\label{tab:do_phuc_tap}
+\begin{tabular}{|l|c|c|c|}
+\hline
+\textbf{Thao tác} & \textbf{Thời gian (Trung bình)} & \textbf{Thời gian (Xấu nhất)} & \textbf{Không gian (Phụ trợ)} \\ \hline
+Thêm (Insert) & $\mathcal{O}(L)$ & $\mathcal{O}(L)$ & $\mathcal{O}(L \cdot \vert{}\Sigma\vert{})$ \\ \hline
+Xóa (Delete) & $\mathcal{O}(L)$ & $\mathcal{O}(L)$ & $\mathcal{O}(L)$ \\ \hline
+Tìm kiếm tiền tố & $\mathcal{O}(L + K)$ & $\mathcal{O}(L + K \cdot L)$ & $\mathcal{O}(K \cdot L)$ \\ \hline
+Sắp xếp (Sort) & $\mathcal{O}(K \log K \cdot L)$ & $\mathcal{O}(K \log K \cdot L)$ & $\mathcal{O}(K \cdot L)$ \\ \hline
+\end{tabular}
+\end{table}
+
+\section{Kết quả thử nghiệm và Các ca kiểm thử (Test Cases)}
+\label{sec:ket_qua_thu_nghiem}
+
+Hệ thống đã được biên dịch bằng bộ biên dịch `g++ (GCC) 13.2.0` trên nền tảng C++17 và tiến hành thử nghiệm thực tế qua các ca kiểm thử tiêu chuẩn.
+
+\subsection{Ca kiểm thử 1: Khởi tạo và Thêm dữ liệu (Insert Test Case)}
+\begin{itemize}
+    \item \textbf{Mục tiêu:} Kiểm tra tính chính xác của việc cấp phát con trỏ và thêm từ mới vào cấu trúc.
+    \item \textbf{Dữ liệu đầu vào:} Chuỗi từ khóa \texttt{"algorithm"}, \texttt{"algebra"}, \texttt{"app"}.
+    \item \textbf{Kết quả kỳ vọng:} Thêm thành công, không phát sinh lỗi truy cập bộ nhớ (Segmentation Fault).
+\end{itemize}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.85\textwidth]{4.2.1.png}
+    \caption{Kết quả kiểm thử thao tác thêm từ mới và xây dựng cây}
+    \label{fig:testcase_insert}
+\end{figure}
+
+\subsection{Ca kiểm thử 2: Tìm kiếm tiền tố (Prefix Search Test Case)}
+\begin{itemize}
+    \item \textbf{Mục tiêu:} Đánh giá khả năng truy xuất tất cả các từ có chung tiền tố.
+    \item \textbf{Dữ liệu đầu vào:} Tiền tố \texttt{"alg"}.
+    \item \textbf{Kết quả đầu ra:} Trả về danh sách gồm \texttt{"algebra"} và \texttt{"algorithm"}.
+\end{itemize}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.85\textwidth]{4.2.2.png}
+    \caption{Kết quả tìm kiếm gợi ý tự động theo tiền tố "alg"}
+    \label{fig:testcase_prefix_search}
+\end{figure}
+
+\subsection{Ca kiểm thử 3: Sắp xếp danh sách kết quả (Sorting Test Case)}
+\begin{itemize}
+    \item \textbf{Mục tiêu:} Kiểm tra thứ tự sắp xếp (theo bảng chữ cái / độ ưu tiên tần suất) của tập kết quả trả về.
+    \item \textbf{Thực thi:} Hệ thống gọi hàm `std::sort` tích hợp trên tập danh sách tìm kiếm được từ tiền tố.
+\end{itemize}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.85\textwidth]{4.3.png}
+    \caption{Kết quả hiển thị danh sách từ khóa sau khi được sắp xếp}
+    \label{fig:testcase_sort}
+\end{figure}
+
+\subsection{Ca kiểm thử 4: Xóa dữ liệu và Quản lý bộ nhớ (Delete Test Case)}
+\begin{itemize}
+    \item \textbf{Mục tiêu:} Đảm bảo xóa chính xác từ cần hủy và giải phóng vùng nhớ (Free memory) mà không làm ảnh hưởng đến các từ có chung tiền tố.
+    \item \textbf{Thao tác:} Xóa từ \texttt{"algebra"}, sau đó thực hiện lại thao tác tìm kiếm tiền tố \texttt{"alg"}.
+    \item \textbf{Kết quả:} Danh sách chỉ còn từ \texttt{"algorithm"}.
+\end{itemize}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.85\textwidth]{4.4.png}
+    \caption{Kết quả sau khi xóa từ khóa và cập nhật lại cây}
+    \label{fig:testcase_delete}
+\end{figure}
+
+\section{Kết luận và Hướng phát triển}
+\label{sec:ket_luan}
+
+\subsection{Kết luận}
+Đề tài đã hoàn thành cơ bản các mục tiêu đề ra ban đầu, bao gồm:
+\begin{itemize}
+    \item Xây dựng thành công ứng dụng bằng ngôn ngữ C++ áp dụng cấu trúc dữ liệu tối ưu cho bài toán gợi ý và quản lý từ khóa.
+    \item Đảm bảo độ phức tạp thời gian đạt $\mathcal{O}(L)$ cho các thao tác tìm kiếm và thêm mới, đáp ứng tốt yêu cầu xử lý thời gian thực.
+    \item Áp dụng quy trình làm việc nhóm chuyên nghiệp tích hợp quản lý công việc trên Jira và quản lý mã nguồn qua Git/GitHub.
+\end{itemize}
+
+\subsection{Hạn chế của chương trình}
+\begin{itemize}
+    \item Mức tiêu tốn bộ nhớ RAM vẫn còn khá cao do việc cấp phát các mảng con trỏ cố định tĩnh tại mỗi nút Trie.
+    \item Chưa hỗ trợ tìm kiếm mờ (Fuzzy Search / Levenshtein Distance) khi người dùng nhập sai chính tả.
+\end{itemize}
+
+\subsection{Hướng phát triển trong tương lai}
+\begin{itemize}
+    \item \textbf{Tối ưu cấu trúc dữ liệu:} Chuyển đổi sang cây Radix Tree (Patricia Trie) để nén các nút đơn, giúp tiết kiệm bộ nhớ RAM từ 30\% - 50\%.
+    \item \textbf{Mở rộng tính năng:} Tích hợp thuật toán tìm kiếm gần đúng (Fuzzy Search) và cơ chế lưu Cache các từ khóa phổ biến để tăng tốc độ truy vấn.
+    \item \textbf{Giao diện người dùng:} Phát triển giao diện đồ họa (GUI) sử dụng Qt Framework thay thế cho giao diện dòng lệnh (CLI) hiện tại.
+\end{itemize}
+
+{\let\clearpage\relax
+\begin{thebibliography}{99}
+
+\bibitem{cormen2009}
+Thomas H. Cormen, Charles E. Leiserson, Ronald L. Rivest, and Clifford Stein,
+\textit{Introduction to Algorithms}, 3rd Edition, MIT Press, 2009.
+
+\bibitem{stroustrup2013}
+Bjarne Stroustrup,
+\textit{The C++ Programming Language}, 4th Edition, Addison-Wesley, 2013.
+
+\bibitem{sedgewick2011}
+Robert Sedgewick and Kevin Wayne,
+\textit{Algorithms}, 4th Edition, Addison-Wesley Professional, 2011.
+
+\end{thebibliography}
+}
+\clearpage
+\chapter*{Phụ lục: Bảng phân công công việc và Tiến độ dự án}
+\addcontentsline{toc}{chapter}{Phụ lục: Bảng phân công công việc}
+\markboth{PHỤ LỤC}{PHỤ LỤC}
+
+Để đảm bảo quy trình phát triển phần mềm chuẩn hóa và minh bạch, nhóm đã áp dụng công cụ \textbf{Jira Software} (quản lý công việc - YC01) và \textbf{GitHub} (quản lý mã nguồn \& phiên bản - YC02). Dưới đây là bảng tổng hợp phân công công việc chi tiết, mã định danh Task/Issue trên Jira và thông tin Commit/Pull Request (PR) tương ứng trên GitHub.
+
+\section*{Bảng phân công chi tiết (Liên kết dữ liệu Jira \& GitHub)}
+
+\begin{table}[H]
+\centering
+\small
+\caption{Bảng phân công công việc chi tiết và liên kết Jira / GitHub}
+\label{tab:phan_cong_cong_viec}
+\begin{tabularx}{\textwidth}{|c|>{\raggedright\arraybackslash}p{2.0cm}|X|c|>{\raggedright\arraybackslash}p{2.7cm}|c|}
+\hline
+\textbf{STT} & \textbf{Thành viên} & \textbf{Nội dung công việc được giao} & \textbf{Mã Jira} & \textbf{Sản phẩm \& Git Commit/PR} & \textbf{Mức độ} \\ \hline
+
+1 & \textbf{Nguyễn Thị Thanh Hà} 
+  & - Soạn thảo Trang bìa, Lời cảm ơn, Mục lục, Danh mục hình/bảng.\newline
+    - Chương 1: Giới thiệu ĐT12, Phân tích nghiệp vụ thực tế.\newline
+    - Xác định tác nhân, sơ đồ yêu cầu chức năng.
+  & \texttt{DT12-1}\newline \texttt{DT12-2}
+  & File:\newline \texttt{\small chap1\_mo\_dau.tex}\newline
+    Commit:\newline \texttt{\small 8a1f3c2}\newline
+    Branch:\newline \texttt{\small docs/chap1}
+  & 100\% \\ \hline
+
+2 & \textbf{Trần Hoài Linh} \newline (Nhóm trưởng) 
+  & - Chương 2: Thiết kế CTDL chi tiết (\texttt{LienHe}, \texttt{Node}, \texttt{DanhBa} - DLL; \texttt{NodeLichSu}, \texttt{LichSuCuocGoi} - SLL).\newline
+    - Vẽ sơ đồ liên kết con trỏ Head/Tail (TikZ).
+  & \texttt{DT12-3}\newline \texttt{DT12-4}
+  & File:\newline \texttt{\small chap2\_ctdl.tex}\newline
+    Commit:\newline \texttt{\small b4e92d1}\newline
+    Branch:\newline \texttt{\small docs/chap2}
+  & 100\% \\ \hline
+
+3 & \textbf{Hoàng Hà Hạnh Ngân}
+  & - Chương 3 (Phần 1): Cài đặt hàm cơ bản (\texttt{TaoNode}, \texttt{KhoiTaoDanhBa}, \texttt{themLienHe}).\newline
+    - Cài đặt \texttt{xoaLienHe} (4 trường hợp) \& Duyệt danh bạ 2 chiều (next/prev).
+  & \texttt{DT12-5}\newline \texttt{DT12-6}
+  & File:\newline \texttt{\small chap3\_phan1.tex}\newline
+    PR: \texttt{\small \#3} (Merged)\newline
+    Commit:\newline \texttt{\small c7f10a4}
+  & 100\% \\ \hline
+
+4 & \textbf{Vo Gia Long}
+  & - Chương 3 (Phần 2): Cài đặt nâng cao (\texttt{SapXepDanhBa} - Bubble Sort, \texttt{TimKiemTheoTen} - Prefix).\newline
+    - Xử lý lịch sử cuộc gọi, đọc/ghi tệp \texttt{danhba.txt} \& giải phóng bộ nhớ.
+  & \texttt{DT12-7}\newline \texttt{DT12-8}
+  & File:\newline \texttt{\small chap3\_phan2.tex}\newline
+    PR: \texttt{\small \#5} (Merged)\newline
+    Commit:\newline \texttt{\small e9d31f8}
+  & 100\% \\ \hline
+
+5 & \textbf{Ứng Thành Nam}
+  & - Chương 4: Đánh giá độ phức tạp ($O(N)$, $O(1)$), chụp ảnh test cases thực tế.\newline
+    - Kết luận, Hướng phát triển, Tài liệu tham khảo.\newline
+    - Tổng hợp Phụ lục phân công công việc.
+  & \texttt{DT12-9}\newline \texttt{DT12-10}
+  & File:\newline \texttt{\small chap4\_ket\_qua.tex}\newline
+    File:\newline \texttt{\small phu\_luc.tex}\newline
+    Commit:\newline \texttt{\small f2c88e5}
+  & 100\% \\ \hline
+
+\end{tabularx}
+\end{table}
+
+\section*{Ghi chú thống kê minh chứng (Jira \& GitHub)}
+\begin{itemize}
+    \item \textbf{Dự án Jira (YC01):} Mã dự án (Project Key) là \texttt{DT12}. Tổng số Issue đã tạo và đóng: 10/10 Tasks (đạt 100\% tiến độ Sprint).
+    \item \textbf{Kho chứa GitHub (YC02):}
+    \begin{itemize}
+        \item Repository: \texttt{https://github.com/nhom-dt12/QuanLyDanhBa\_CPP}
+        \item Quy trình làm việc: Sử dụng mô hình \textbf{Git Flow} chia làm các nhánh chức năng (\texttt{feature/*}, \texttt{docs/*}), tạo Pull Request (PR) có Code Review trước khi hợp nhất (Merge) vào nhánh \texttt{main}.
+    \end{itemize}
+\end{itemize}
+
+\end{document}
