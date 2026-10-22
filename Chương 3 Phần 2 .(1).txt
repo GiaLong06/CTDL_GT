@@ -1,0 +1,346 @@
+\documentclass[11pt, a4paper]{article}
+\usepackage[a4paper, margin=2cm, bottom=2.3cm, top=2.3cm]{geometry}
+\usepackage[utf8]{vietnam} % Hỗ trợ tiếng Việt chuẩn tuyệt đối trên mọi trình biên dịch
+
+\usepackage{amsmath, amssymb}
+\usepackage{booktabs}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage[hidelinks]{hyperref}
+
+% Custom Color Palette
+\definecolor{primary}{RGB}{15, 23, 42}       % Dark Slate
+\definecolor{secondary}{RGB}{30, 58, 138}    % Deep Blue
+\definecolor{accent}{RGB}{3, 105, 161}       % Sky Accent
+\definecolor{codebg}{RGB}{248, 250, 252}     % Light Slate Background
+\definecolor{codeborder}{RGB}{226, 232, 240} % Border Grey
+\definecolor{commentgreen}{RGB}{22, 101, 52} % Dark Green
+\definecolor{keywordblue}{RGB}{29, 78, 216}  % Blue
+\definecolor{stringred}{RGB}{185, 28, 28}    % Red
+
+% Config listings
+\lstset{
+    language=C,
+    backgroundcolor=\color{codebg},
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{keywordblue}\bfseries,
+    commentstyle=\color{commentgreen}\itshape,
+    stringstyle=\color{stringred},
+    numberstyle=\tiny\color{gray},
+    numbers=left,
+    numbersep=6pt,
+    stepnumber=1,
+    showspaces=false,
+    showstringspaces=false,
+    breaklines=true,
+    breakatwhitespace=true,
+    tabsize=4,
+    frame=single,
+    rulecolor=\color{codeborder},
+    captionpos=b,
+    inputencoding=utf8
+}
+
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{\textcolor{gray}{\small Chương 3: Cài Đặt Hệ Thống -- Phần 2}}
+\lhead{\textcolor{gray}{\small Báo Cáo Đồ Án Cấu Trúc Dữ Liệu \& Thuật Toán}}
+\cfoot{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+\titleformat{\section}{\large\bfseries\color{secondary}}{\thesection}{0.8em}{}
+\titleformat{\subsection}{\normalsize\bfseries\color{accent}}{\thesubsection}{0.8em}{}
+
+\begin{document}
+
+% ==========================================
+% TIÊU ĐỀ CHƯƠNG
+% ==========================================
+\begin{center}
+    {\Large \bfseries \color{primary} CHƯƠNG 3: CÀI ĐẶT HỆ THỐNG}\\[6pt]
+    {\large \bfseries \color{secondary} PHẦN 2: CÀI ĐẶT CÁC CHỨC NĂNG NÂNG CAO}\\[4pt]
+    {\small \bfseries \color{accent} Sắp Xếp, Tìm Kiếm Tiền Tố, Lịch Sử Cuộc Gọi \& Đọc/Ghi Tệp Tin}\\[10pt]
+    \rule{\textwidth}{1pt}
+\end{center}
+
+\section{Tổng Quan Chương Và Kiến Trúc Dữ Liệu Cốt Lõi}
+
+Phần này chi tiết hóa việc cài đặt các thuật toán nâng cao và quản lý bộ nhớ động cho ứng dụng Quản lý Danh bạ Điện thoại bằng ngôn ngữ C. Hệ thống kết hợp hai cấu trúc dữ liệu chính:
+
+\begin{enumerate}
+    \item \textbf{Mảng động các cấu trúc (Array of Structs):} Lưu trữ các liên lạc trong danh bạ, cho phép truy xuất trực tiếp $O(1)$ và sắp xếp tại chỗ (in-place).
+    \item \textbf{Danh sách liên kết đơn (Singly Linked List):} Quản lý lịch sử cuộc gọi gần đây, hỗ trợ thao tác chèn vào đầu (Head Insertion) đạt độ phức tạp $O(1)$ theo cơ chế LIFO.
+\end{enumerate}
+
+\begin{lstlisting}[caption={Định nghĩa các cấu trúc dữ liệu chính}]
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+
+#define MAX_NAME 50
+#define MAX_PHONE 15
+#define FILENAME "danhba.txt"
+
+typedef struct {
+    char hoTen[MAX_NAME];
+    char soDienThoai[MAX_PHONE];
+    char email[50];
+} LienLac;
+
+typedef struct NodeLichSu {
+    char soDienThoai[MAX_PHONE];
+    char thoiGian[30]; // Dang YYYY-MM-DD HH:MM:SS
+    struct NodeLichSu* next;
+} NodeLichSu;
+
+typedef struct {
+    LienLac* danhSach;      // Mang dong luu lien lac
+    int soLuong;            // So luong hien tai
+    int sucChua;            // Suc chua toi da cua mang
+    NodeLichSu* headLichSu; // Con tro dau danh sach lich su
+} QuanLyDanhBa;
+\end{lstlisting}
+
+% ==========================================
+% SẮP XẾP BUBBLE SORT
+% ==========================================
+\section{Thuật Toán Sắp Xếp Nổi Bọt (Bubble Sort) Theo Tên}
+
+\subsection{Nguyên Lý Hoạt Động \& Phân Tích Độ Phức Tạp}
+Thuật toán so sánh từng cặp phần tử liền kề và đổi chỗ nếu chúng sai thứ tự bảng chữ cái (không phân biệt hoa/thường). Việc sử dụng cờ hiệu \texttt{swapped} giúp dừng sớm nếu mảng đã sắp xếp.
+
+\begin{itemize}
+    \item \textbf{Độ phức tạp thời gian:} Tốt nhất $O(n)$ (mảng đã sắp xếp), Trung bình/Xấu nhất $O(n^2)$.
+    \item \textbf{Độ phức tạp không gian:} $O(1)$ (Sắp xếp tại chỗ).
+\end{itemize}
+
+\begin{table}[h!]
+\centering
+\caption{Các bước xử lý thuật toán Sắp xếp Nổi Bọt}
+\vspace{0.1cm}
+\small
+\begin{tabular}{@{}c p{13cm}@{}}
+\toprule
+\textbf{Bước} & \textbf{Mô Tả Chi Tiết} \\ \midrule
+1 & Nếu danh bạ rỗng hoặc có 1 phần tử thì kết thúc. \\
+2 & Vòng lặp $i$ chạy từ $0$ đến $n-2$, đặt \texttt{swapped = 0}. \\
+3 & Vòng lặp $j$ từ $0$ đến $n-i-2$: So sánh $A[j]$ và $A[j+1]$ bằng \texttt{strcasecmp}. \\
+4 & Nếu $A[j] > A[j+1]$, hoán đổi $A[j]$ và $A[j+1]$, gán \texttt{swapped = 1}. \\
+5 & Nếu hết lượt $j$ mà \texttt{swapped == 0}, dừng thuật toán sớm. \\ \bottomrule
+\end{tabular}
+\end{table}
+
+\begin{lstlisting}[caption={Hàm Hoán đổi và Sắp xếp nổi bọt tối ưu}]
+void HoanDoi(LienLac* a, LienLac* b) {
+    LienLac temp = *a;
+    *a = *b;
+    *b = temp;
+}
+
+void SapXepDanhBa(QuanLyDanhBa* ql) {
+    if (ql == NULL || ql->soLuong < 2) return;
+    int n = ql->soLuong, swapped;
+
+    for (int i = 0; i < n - 1; i++) {
+        swapped = 0;
+        for (int j = 0; j < n - i - 1; j++) {
+            if (strcasecmp(ql->danhSach[j].hoTen, ql->danhSach[j + 1].hoTen) > 0) {
+                HoanDoi(&(ql->danhSach[j]), &(ql->danhSach[j + 1]));
+                swapped = 1;
+            }
+        }
+        if (swapped == 0) break; // Dung som neu da sap xep
+    }
+    printf("Da sap xep danh ba theo thu tu alphabet thanh cong!\n");
+}
+\end{lstlisting}
+
+\begin{table}[h!]
+\centering
+\caption{Bảng vết chạy (Trace Table) minh họa sắp xếp 4 phần tử}
+\vspace{0.1cm}
+\small
+\begin{tabular}{@{}cccllc@{}}
+\toprule
+\textbf{Lượt ($i$)} & \textbf{Vị Trí ($j$)} & \textbf{So Sánh} & \textbf{Thao Tác} & \textbf{Trạng Thái Mảng Sau Lượt} \\ \midrule
+$i = 0$ & $j = 0$ & "Vũ Cường" > "An Phát" & Hoán đổi & [An Phát, Vũ Cường, Bùi Hải, Đặng Triết] \\
+$i = 0$ & $j = 1$ & "Vũ Cường" > "Bùi Hải" & Hoán đổi & [An Phát, Bùi Hải, Vũ Cường, Đặng Triết] \\
+$i = 0$ & $j = 2$ & "Vũ Cường" > "Đặng Triết" & Hoán đổi & [An Phát, Bùi Hải, Đặng Triết, Vũ Cường] \\ \midrule
+$i = 1$ & $j = 0..1$ & Không có hoán đổi & Giữ nguyên & [An Phát, Bùi Hải, Đặng Triết, Vũ Cường] \\
+$i = 2$ & - & \texttt{swapped == 0} & Dừng sớm & [An Phát, Bùi Hải, Đặng Triết, Vũ Cường] \\ \bottomrule
+\end{tabular}
+\end{table}
+
+% ==========================================
+% TÌM KIẾM TIỀN TỐ
+% ==========================================
+\section{Thuật Toán Tìm Kiếm Theo Tiền Tố (Prefix Search)}
+
+Cho phép tìm kiếm các liên lạc có họ tên bắt đầu bằng chuỗi nhập vào, không phân biệt chữ hoa/thường nhờ hàm \texttt{tolower}.
+
+\begin{lstlisting}[caption={Hàm kiểm tra tiền tố và tìm kiếm danh bạ}]
+int IsPrefix(const char* prefix, const char* str) {
+    size_t lenPrefix = strlen(prefix), lenStr = strlen(str);
+    if (lenPrefix > lenStr) return 0;
+    for (size_t i = 0; i < lenPrefix; i++) {
+        if (tolower((unsigned char)prefix[i]) != tolower((unsigned char)str[i]))
+            return 0;
+    }
+    return 1;
+}
+
+void TimKiemTheoTen(const QuanLyDanhBa* ql, const char* tienTo) {
+    if (ql == NULL || ql->soLuong == 0) return;
+    printf("\n=== KET QUA TIM KIEM THEO TIEN TO: '%s' ===\n", tienTo);
+    int count = 0;
+    for (int i = 0; i < ql->soLuong; i++) {
+        if (IsPrefix(tienTo, ql->danhSach[i].hoTen)) {
+            printf("[%d] Ten: %-20s | SDT: %-12s | Email: %s\n",
+                   ++count, ql->danhSach[i].hoTen, ql->danhSach[i].soDienThoai, ql->danhSach[i].email);
+        }
+    }
+    if (count == 0) printf("Khong tim thay ket qua phu hop.\n");
+}
+\end{lstlisting}
+
+% ==========================================
+% LỊCH SỬ CUỘC GỌI
+% ==========================================
+\section{Quản Lý Lịch Sử Cuộc Gọi Bằng Danh Sách Liên Kết Đơn}
+
+Sử dụng thao tác **Chèn vào đầu danh sách (Head Insertion)** giúp lưu lịch sử cuộc gọi mới nhất lên trên cùng với chi phí $O(1)$.
+
+\begin{lstlisting}[caption={Hàm ghi nhận cuộc gọi và hiển thị lịch sử}]
+void GhiNhanCuocGoi(QuanLyDanhBa* ql, const char* soDienThoai, const char* thoiGian) {
+    if (ql == NULL) return;
+    NodeLichSu* newNode = (NodeLichSu*)malloc(sizeof(NodeLichSu));
+    if (newNode == NULL) return;
+
+    strncpy(newNode->soDienThoai, soDienThoai, MAX_PHONE - 1);
+    newNode->soDienThoai[MAX_PHONE - 1] = '\0';
+    strncpy(newNode->thoiGian, thoiGian, 29);
+    newNode->thoiGian[29] = '\0';
+
+    // Chen dau (Head Insertion) - O(1)
+    newNode->next = ql->headLichSu;
+    ql->headLichSu = newNode;
+    printf("Da ghi nhan cuoc goi den so %s luc %s\n", soDienThoai, thoiGian);
+}
+
+void HienThiLichSu(const QuanLyDanhBa* ql) {
+    if (ql == NULL || ql->headLichSu == NULL) {
+        printf("\nLich su cuoc goi ranh/rong.\n");
+        return;
+    }
+    printf("\n=== LICH SU CUOC GOI GAN NAY ===\n");
+    NodeLichSu* current = ql->headLichSu;
+    int index = 1;
+    while (current != NULL) {
+        printf("%2d. SDT: %-15s | Thoi gian: %s\n", index++, current->soDienThoai, current->thoiGian);
+        current = current->next;
+    }
+}
+\end{lstlisting}
+
+% ==========================================
+% ĐỌC/GHI FILE & GIẢI PHÓNG BỘ NHỚ
+% ==========================================
+\section{Cơ Chế Đọc/Ghi Tệp Tin Và Giải Phòng Bộ Nhớ}
+
+Dữ liệu được lưu trữ lâu dài trong tệp \texttt{danhba.txt}. Hàm giải phóng thu hồi bộ nhớ của cả mảng động và các node trong danh sách liên kết để chống rò rỉ bộ nhớ (Memory Leak).
+
+\begin{lstlisting}[caption={Cơ chế đọc/ghi tệp tin và giải phóng bộ nhớ}]
+void LuuFile(const QuanLyDanhBa* ql) {
+    if (ql == NULL) return;
+    FILE* f = fopen(FILENAME, "w");
+    if (!f) return;
+    fprintf(f, "%d\n", ql->soLuong);
+    for (int i = 0; i < ql->soLuong; i++) {
+        fprintf(f, "%s,%s,%s\n", ql->danhSach[i].hoTen, ql->danhSach[i].soDienThoai, ql->danhSach[i].email);
+    }
+    fclose(f);
+    printf("Luu danh ba vao file '%s' thanh cong!\n", FILENAME);
+}
+
+void DocFile(QuanLyDanhBa* ql) {
+    if (ql == NULL) return;
+    FILE* f = fopen(FILENAME, "r");
+    if (!f) return;
+    int count = 0;
+    if (fscanf(f, "%d\n", &count) != 1) { fclose(f); return; }
+
+    for (int i = 0; i < count; i++) {
+        LienLac lc; char line[150];
+        if (fgets(line, sizeof(line), f) != NULL) {
+            line[strcspn(line, "\n")] = 0;
+            char* token = strtok(line, ",");
+            if (token) strncpy(lc.hoTen, token, MAX_NAME);
+            token = strtok(NULL, ",");
+            if (token) strncpy(lc.soDienThoai, token, MAX_PHONE);
+            token = strtok(NULL, ",");
+            if (token) strncpy(lc.email, token, 49);
+
+            if (ql->soLuong >= ql->sucChua) {
+                ql->sucChua *= 2;
+                ql->danhSach = (LienLac*)realloc(ql->danhSach, ql->sucChua * sizeof(LienLac));
+            }
+            ql->danhSach[ql->soLuong++] = lc;
+        }
+    }
+    fclose(f);
+}
+
+void GiaiPhongBoNho(QuanLyDanhBa* ql) {
+    if (ql == NULL) return;
+    if (ql->danhSach != NULL) { free(ql->danhSach); ql->danhSach = NULL; }
+    NodeLichSu* current = ql->headLichSu;
+    while (current != NULL) {
+        NodeLichSu* temp = current;
+        current = current->next;
+        free(temp);
+    }
+    ql->headLichSu = NULL; ql->soLuong = 0;
+    printf("Da giai phong toan bo bo nho cap phat dong.\n");
+}
+\end{lstlisting}
+
+% ==========================================
+% MAIN INTEGRATION & KẾT LUẬN
+% ==========================================
+\section{Chương Trình Mẫu Minh Họa (Main Integration)}
+
+\begin{lstlisting}[caption={Hàm main kiểm thử toàn bộ chức năng}]
+int main() {
+    QuanLyDanhBa ql = {NULL, 0, 5, NULL};
+    ql.danhSach = (LienLac*)malloc(ql.sucChua * sizeof(LienLac));
+
+    DocFile(&ql);
+    if (ql.soLuong == 0) { // Du lieu gia lap
+        LienLac l1 = {"Nguyen Van An", "0901234567", "an@gmail.com"};
+        LienLac l2 = {"Bui Thi Binh", "0912345678", "binh@gmail.com"};
+        LienLac l3 = {"Nguyen Duc Cuong", "0987654321", "cuong@gmail.com"};
+        ql.danhSach[ql.soLuong++] = l1;
+        ql.danhSach[ql.soLuong++] = l2;
+        ql.danhSach[ql.soLuong++] = l3;
+    }
+
+    // Kiem thu chuc nang
+    SapXepDanhBa(&ql);
+    TimKiemTheoTen(&ql, "Nguyen");
+    GhiNhanCuocGoi(&ql, "0901234567", "2026-10-23 08:30:00");
+    GhiNhanCuocGoi(&ql, "0987654321", "2026-10-23 09:15:00");
+    HienThiLichSu(&ql);
+
+    LuuFile(&ql);
+    GiaiPhongBoNho(&ql);
+    return 0;
+}
+\end{lstlisting}
+
+\section{Tóm Tắt Chương 3 - Phần 2}
+Báo cáo đã hoàn thành thiết kế và cài đặt toàn bộ chức năng nâng cao: Sắp xếp Bubble Sort tối ưu $O(n)$, Tìm kiếm tiền tố chính xác, Nhật ký cuộc gọi bằng Danh sách liên kết đơn $O(1)$, cùng cơ chế Đọc/Ghi file đĩa cứng và Quản lý giải phóng bộ nhớ động triệt để.
+
+\end{document}
