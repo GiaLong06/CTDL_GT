@@ -1,0 +1,381 @@
+\documentclass[12pt,a4paper]{report}
+\usepackage[utf8]{vietnam}
+\usepackage{listings}
+
+\lstset{
+  inputencoding=utf8,
+  extendedchars=true,
+  literate=
+    {à}{{\`a}}1 {á}{{\'a}}1 {ả}{{\h a}}1 {ã}{{\~a}}1 {ạ}{{\d a}}1
+    {À}{{\`A}}1 {Á}{{\'A}}1 {Ả}{{\h A}}1 {Ã}{{\~A}}1 {Ạ}{{\d A}}1
+    {ă}{{\u a}}1 {ằ}{{\`{\u a}}}1 {ắ}{{\'{\u a}}}1 {ẳ}{{\h{\u a}}}1 {ẵ}{{\~{\u a}}}1 {ặ}{{\d{\u a}}}1
+    {â}{{\^a}}1 {ầ}{{\`{\^a}}}1 {ấ}{{\'{\^a}}}1 {ẩ}{{\h{\^a}}}1 {ẫ}{{\~{\^a}}}1 {ậ}{{\d{\^a}}}1
+    {đ}{{\dj}}1 {Đ}{{\DJ}}1
+    {è}{{\`e}}1 {é}{{\'e}}1 {ẻ}{{\h e}}1 {ẽ}{{\~e}}1 {ẹ}{{\d e}}1
+    {ê}{{\^e}}1 {ề}{{\`{\^e}}}1 {ế}{{\'{\^e}}}1 {ể}{{\h{\^e}}}1 {ễ}{{\~{\^e}}}1 {ệ}{{\d{\^e}}}1
+    {ì}{{\`i}}1 {í}{{\'i}}1 {ỉ}{{\h i}}1 {ĩ}{{\~i}}1 {ị}{{\d i}}1
+    {ò}{{\`o}}1 {ó}{{\'o}}1 {ỏ}{{\h o}}1 {õ}{{\~o}}1 {ọ}{{\d o}}1
+    {ô}{{\^o}}1 {ồ}{{\`{\^o}}}1 {ố}{{\'{\^o}}}1 {ổ}{{\h{\^o}}}1 {ỗ}{{\~{\^o}}}1 {ộ}{{\d{\^o}}}1
+    {ơ}{{\'o}}1 {ờ}{{\`o}}1 {ở}{{\h o}}1 {ỡ}{{\~o}}1 {ợ}{{\d o}}1
+    {ù}{{\`u}}1 {ú}{{\'u}}1 {ủ}{{\h u}}1 {ũ}{{\~u}}1 {ụ}{{\d u}}1
+    {ư}{{\'u}}1 {ừ}{{\`u}}1 {ử}{{\h u}}1 {ữ}{{\~u}}1 {ự}{{\d u}}1
+}
+\usepackage{color}
+\usepackage{graphicx}
+\usepackage{geometry}
+\geometry{left=3cm,right=2cm,top=2.5cm,bottom=2.5cm}
+
+\begin{document}
+
+\chapter{CÀI ĐẶT CHI TIẾT CÁC THAO TÁC CƠ BẢN TRÊN DANH BẠ}
+
+\section{Tổng quan Phân hệ Quản lý Danh bạ Cơ bản}
+Trong hệ thống ứng dụng \textbf{Quản lý Danh bạ Điện thoại và Lịch sử Cuộc gọi (Đề tài ĐT12)}, thành phần danh bạ đóng vai trò là cơ sở dữ liệu lõi lưu trữ toàn bộ thông tin liên lạc của người dùng. Việc lựa chọn cấu trúc dữ liệu phù hợp ảnh hưởng trực tiếp đến tốc độ phản hồi của ứng dụng, hiệu quả sử dụng tài nguyên bộ nhớ hệ thống và khả năng mở rộng các tính năng nâng cao trong tương lai.
+
+Đối với đề tài này, cấu trúc dữ liệu \textbf{Danh sách liên kết đôi (Doubly Linked List)} được lựa chọn làm nền tảng. Phân hệ quản lý cơ bản do Thành viên 3 phụ trách tập trung vào việc thiết lập các thao tác nền tảng nhất của danh bạ, bao gồm:
+\begin{enumerate}
+    \item Khởi tạo cấu trúc quản lý danh bạ và cơ chế cấp phát nút (\texttt{Node}) động trên vùng nhớ Heap.
+    \item Thêm liên hệ mới vào danh bạ theo nguyên tắc chèn vào cuối (\texttt{themLienHe}).
+    \item Xóa liên hệ theo số điện thoại với việc phân rã và xử lý triệt để tất cả 4 trường hợp biên (\texttt{xoaLienHe}).
+    \item Duyệt danh bạ theo hai chiều xuôi (từ \texttt{head} đến \texttt{tail}) và chiều ngược (từ \texttt{tail} về \texttt{head}).
+\end{enumerate}
+
+Chương này trình bày toàn bộ cơ sở lý thuyết phần cứng, mô hình hóa bộ nhớ, giải thuật chi tiết, bảng trace biến, mã giả, phân tích mã nguồn C++ từng dòng và đánh giá độ phức tạp thuật toán một cách toàn diện.
+
+---
+
+\section{Cơ sở Lý thuyết và Kiến trúc Bộ nhớ của Danh sách Liên kết đôi}
+
+\subsection{So sánh Kiến trúc Bộ nhớ: Cấp phát Tĩnh vs Cấp phát Động}
+Để hiểu rõ lý do lựa chọn Danh sách liên kết đôi, ta cần phân tích cách thức hệ điều hành quản lý bộ nhớ RAM thông qua hai phân vùng chính: \textbf{Stack} và \textbf{Heap}.
+
+\begin{table}[htbp]
+    \centering
+    \small
+    \begin{tabular}{|p{3.5cm}|p{5.5cm}|p{5.5cm}|}
+    \hline
+    \textbf{Tiêu chí so sánh} & \textbf{Cấp phát tĩnh (Mảng / Stack)} & \textbf{Cấp phát động (LinkedList / Heap)} \\ \hline
+    \textbf{Kích thước vùng nhớ} & Cố định ngay tại thời điểm biên dịch (\textit{Compile-time}). & Linh hoạt, thay đổi tại thời điểm chạy (\textit{Runtime}). \\ \hline
+    \textbf{Vị trí lưu trữ} & Phân vùng bộ nhớ Stack. & Phân vùng bộ nhớ Heap. \\ \hline
+    \textbf{Tính liên tục bộ nhớ} & Các phần tử nằm trên các ô nhớ liên tiếp nhau. & Các nút nằm rải rác trên các ô nhớ khác nhau. \\ \hline
+    \textbf{Thao tác chèn / xóa} & Tốn chi phí $O(n)$ do phải dồn/dịch chuyển các phần tử. & Chỉ tốn $O(1)$ để cập nhật lại các con trỏ liên kết. \\ \hline
+    \textbf{Quản lý bộ nhớ} & Tự động thu hồi khi thoát khỏi phạm vi khối lệnh. & Lập trình viên phải tự giải phóng thủ công bằng \texttt{delete}. \\ \hline
+    \end{tabular}
+    \caption{So sánh đặc tính kỹ thuật giữa Cấp phát tĩnh và Cấp phát động}
+\end{table}
+
+Trong ứng dụng danh bạ điện thoại, số lượng liên hệ của người dùng là không cố định. Nếu sử dụng mảng tĩnh, việc khai báo kích thước quá nhỏ sẽ gây ra lỗi tràn bộ nhớ (\textit{Buffer Overflow}), trong khi khai báo quá lớn sẽ gây lãng phí RAM. Do đó, việc cấp phát động từng nút trên vùng nhớ Heap là giải pháp tối ưu nhất.
+
+\subsection{Cấu trúc chi tiết của một Nút (Node) và Cấu trúc Quản lý (DanhBa)}
+Mỗi nút trong danh sách liên kết đôi đóng vai trò là một ô lưu trữ thông tin hoàn chỉnh, bao gồm hai phần chính:
+\begin{enumerate}
+    \item \textbf{Thành phần Dữ liệu (\texttt{duLieu}):} Lưu trữ một đối tượng thuộc cấu trúc \texttt{LienHe}, gồm hai chuỗi ký tự \texttt{ten} (Họ và tên) và \texttt{sdt} (Số điện thoại).
+    \item \textbf{Thành phần Con trỏ Liên kết:}
+    \begin{itemize}
+        \item \texttt{next}: Con trỏ trỏ đến địa chỉ ô nhớ của nút tiếp theo trong danh sách.
+        \item \texttt{prev}: Con trỏ trỏ đến địa chỉ ô nhớ của nút đứng ngay phía trước.
+    \end{itemize}
+\end{enumerate}
+
+Cấu trúc quản lý \textbf{\texttt{DanhBa}} giữ vai trò là "điểm tựa" để truy cập vào danh sách, chứa hai con trỏ con mốc:
+\begin{itemize}
+    \item \texttt{head}: Nắm giữ địa chỉ của nút đầu tiên trong danh sách.
+    \item \texttt{tail}: Nắm giữ địa chỉ của nút cuối cùng trong danh sách.
+\end{itemize}
+
+\subsection{Sơ đồ Tổ chức Bộ nhớ của Danh sách Liên kết đôi}
+Hình vẽ dưới đây thể hiện trực quan cách các con trỏ \texttt{next} và \texttt{prev} liên kết các nút rải rác trên vùng nhớ Heap thành một chuỗi dữ liệu hai chiều thống nhất:
+
+\begin{center}
+\begin{verbatim}
+  +----------+         +---------------------------------------+         +----------+
+  |  DanhBa  |         |                HEAP                   |         |  DanhBa  |
+  +----------+         +---------------------------------------+         +----------+
+  | head  ---+-------->| [Node 1]          [Node 2]   [Node 3] |<--------+--- tail  |
+  +----------+         | +-------+        +-------+  +-------+ |         +----------+
+                       | |prev=0 |<-------|prev   |<--|prev   | |
+                       | |data A |        |data B |  |data C | |
+                       | |next---+------->|next---+->|next=0 | |
+                       | +-------+        +-------+  +-------+ |
+                       +---------------------------------------+
+\end{verbatim}
+\end{center}
+
+---
+
+\section{Cài đặt Hàm Khởi tạo và Cấp phát Nút}
+
+\subsection{Phân tích Thuật toán Khởi tạo Danh bạ (\texttt{KhoiTaoDanhBa})}
+Khi chương trình vừa được khởi chạy, danh bạ chưa chứa bất kỳ thông tin liên hệ nào. Để tránh hiện tượng con trỏ rác (\textit{Dangling Pointer}) trỏ tới các vùng nhớ không hợp lệ gây lỗi ngắt trang (\textit{Segmentation Fault}), ta bắt buộc phải gán cả hai con trỏ quản lý \texttt{head} và \texttt{tail} về giá trị \texttt{NULL} (hoặc \texttt{nullptr} trong C++11 trở lên).
+
+\subsubsection{Mã giả (Pseudocode) cho hàm Khởi tạo}
+\begin{verbatim}
+Algorithm KhoiTaoDanhBa(db):
+    Input: Khai bao bien db thuoc kieu DanhBa (truyen tham chieu)
+    Output: DanhBa rong duoc thiet lap an toan
+    
+    1. db.head <- NULL
+    2. db.tail <- NULL
+    3. Return
+\end{verbatim}
+
+\subsubsection{Mã nguồn C++ và Giải thích Chi tiết từng Dòng}
+\begin{lstlisting}[language=C++, caption={Cài đặt hàm KhoiTaoDanhBa}]
+void KhoiTaoDanhBa(DanhBa &db) {
+    db.head = NULL; // Dong 1: Gan con tro dau danh sach ve trang thai rong
+    db.tail = NULL; // Dong 2: Gan con tro cuoi danh sach ve trang thai rong
+}
+\end{lstlisting}
+\textbf{Giải thích mã nguồn:}
+\begin{itemize}
+    \item \texttt{DanhBa \&db}: Tham chiếu (\textit{Reference}) cho phép hàm chỉnh sửa trực tiếp biến \texttt{db} gốc được truyền từ hàm gọi mà không tạo ra bản sao.
+    \item \texttt{db.head = NULL} \& \texttt{db.tail = NULL}: Khẳng định danh sách hiện chưa có nút nào, làm mốc cho các phép kiểm tra rỗng (\texttt{db.head == NULL}) ở các hàm sau.
+\end{itemize}
+
+\subsection{Phân tích Thuật toán Cấp phát Nút (\texttt{TaoNode})}
+Hàm \texttt{TaoNode} có nhiệm vụ khởi tạo một không gian lưu trữ cho một liên hệ đơn lẻ. Hàm nhận vào một cấu trúc dữ liệu \texttt{LienHe} chứa tên và số điện thoại, sau đó yêu cầu hệ điều hành cấp phát bộ nhớ động trên Heap.
+
+\subsubsection{Mã giả (Pseudocode) cho hàm TaoNode}
+\begin{verbatim}
+Algorithm TaoNode(lh):
+    Input: Cau truc LienHe lh chua thong tin (ten, sdt)
+    Output: Con tro nodeMoi tro toi Node vua duoc cap phat
+    
+    1. nodeMoi <- allocate Memory for Node
+    2. If nodeMoi == NULL then
+    3.     Print "Loi cap phat bo nho!"
+    4.     Return NULL
+    5. nodeMoi.duLieu <- lh
+    6. nodeMoi.prev <- NULL
+    7. nodeMoi.next <- NULL
+    8. Return nodeMoi
+\end{verbatim}
+
+\subsubsection{Mã nguồn C++ và Giải thích Chi tiết từng Dòng}
+\begin{lstlisting}[language=C++, caption={Cài đặt hàm TaoNode}]
+Node* TaoNode(LienHe lh) {
+    Node* nodeMoi = new Node;   // Dong 1: Cap phat dong mot o nho kieu Node tren Heap
+    nodeMoi->duLieu = lh;      // Dong 2: Gan du lieu lien he vao truong duLieu
+    nodeMoi->prev = NULL;       // Dong 3: Khoi tao con tro prev tro ve NULL
+    nodeMoi->next = NULL;       // Dong 4: Khoi tao con tro next tro ve NULL
+    return nodeMoi;             // Dong 5: Tra ve dia chi cua nut vua tao
+}
+\end{lstlisting}
+\textbf{Giải thích mã nguồn:}
+\begin{itemize}
+    \item \texttt{new Node}: Toán tử xin cấp phát một khối bộ nhớ có kích thước bằng \texttt{sizeof(Node)} trên Heap và trả về địa chỉ con trỏ.
+    \item \texttt{nodeMoi->duLieu = lh}: Sao chép dữ liệu truyền vào vào vùng nhớ vừa cấp phát.
+    \item \texttt{nodeMoi->prev = NULL} \& \texttt{nodeMoi->next = NULL}: Cô lập nút mới, đảm bảo nút này chưa dính liền với bất kỳ danh sách nào.
+\end{itemize}
+
+---
+
+\section{Cài đặt Thao tác Thêm Liên Hệ vào Danh Bạ (\texttt{themLienHe})}
+
+\subsection{Phân tích Giải thuật Chèn Đuôi (Tail Insertion)}
+Khi người dùng nhập một liên hệ mới, hệ thống thực hiện chèn nút này vào vị trí cuối cùng của danh sách liên kết đôi (\texttt{tail} insertion). Nguyên tắc này giúp duy trì thứ tự thời gian nhập dữ liệu trước khi chuyển sang phân hệ sắp xếp.
+
+Giải thuật rẽ nhánh thành 2 kịch bản hoàn toàn khác nhau:
+\begin{enumerate}
+    \item \textbf{Kịch bản 1: Danh bạ rỗng (\texttt{db.head == NULL}):}
+    Nút mới tạo sẽ trở thành nút duy nhất của danh bạ. Do đó, cả hai con trỏ \texttt{head} và \texttt{tail} đều phải trỏ trực tiếp đến nút mới này.
+    \item \textbf{Kịch bản 2: Danh bạ đã có ít nhất 1 nút:}
+    Ta thực hiện liên kết 3 bước:
+    \begin{itemize}
+        \item Bước 1: Cho con trỏ \texttt{prev} của nút mới trỏ về nút \texttt{tail} hiện tại (\texttt{moi->prev = db.tail}).
+        \item Bước 2: Cho con trỏ \texttt{next} của nút \texttt{tail} hiện tại trỏ đến nút mới (\texttt{db.tail->next = moi}).
+        \item Bước 3: Cập nhật con trỏ \texttt{tail} của danh bạ sang nút mới (\texttt{db.tail = moi}).
+    \end{itemize}
+\end{enumerate}
+
+\subsection{Mô phỏng Diễn biến Con trỏ qua Bảng Trace}
+Giả định hệ thống thực hiện chèn lần lượt 3 liên hệ vào danh bạ rỗng: 
+$A = (\text{"Nguyen Van A"}, \text{"0901"})$; 
+$B = (\text{"Tran Thi B"}, \text{"0902"})$; 
+$C = (\text{"Le Van C"}, \text{"0903"})$.
+
+\begin{table}[htbp]
+    \centering
+    \small
+    \begin{tabular}{|c|c|p{3cm}|p{3cm}|p{5cm}|}
+    \hline
+    \textbf{Bước} & \textbf{Nút thêm} & \textbf{Địa chỉ \texttt{db.head}} & \textbf{Địa chỉ \texttt{db.tail}} & \textbf{Mô tả thay đổi liên kết con trỏ} \\ \hline
+    0 & - & \texttt{NULL} & \texttt{NULL} & Danh bạ khởi tạo rỗng. \\ \hline
+    1 & $A$ (\texttt{0x100}) & \texttt{0x100} & \texttt{0x100} & \texttt{head} và \texttt{tail} cùng trỏ đến \texttt{0x100}. $A.\text{prev}=\text{NULL}, A.\text{next}=\text{NULL}$. \\ \hline
+    2 & $B$ (\texttt{0x200}) & \texttt{0x100} & \texttt{0x200} & $B.\text{prev} = \text{0x100}$; $A.\text{next} = \text{0x200}$; \texttt{tail} dịch chuyển sang \texttt{0x200}. \\ \hline
+    3 & $C$ (\texttt{0x300}) & \texttt{0x100} & \texttt{0x300} & $C.\text{prev} = \text{0x200}$; $B.\text{next} = \text{0x300}$; \texttt{tail} dịch chuyển sang \texttt{0x300}. \\ \hline
+    \end{tabular}
+    \caption{Bảng vết chuyển trạng thái địa chỉ ô nhớ khi thêm liên hệ}
+\end{table}
+
+\subsection{Mã nguồn C++ và Giải thích Chi tiết}
+\begin{lstlisting}[language=C++, caption={Cài đặt hàm themLienHe}]
+void themLienHe(DanhBa &db, string ten, string sdt) {
+    LienHe lh = {ten, sdt};         // Dong 1: Tao doi tuong LienHe tam thoi
+    Node* moi = TaoNode(lh);        // Dong 2: Cap phat Node moi bang ham TaoNode
+
+    if (db.head == NULL) {          // Dong 3: Kiem tra neu danh ba rong
+        db.head = moi;              // Dong 4: Gan head tro vao node moi
+        db.tail = moi;              // Dong 5: Gan tail tro vao node moi
+    } else {                        // Dong 6: Danh ba da co phan tu
+        moi->prev = db.tail;        // Dong 7: Noi prev cua node moi ve tail cu
+        db.tail->next = moi;        // Dong 8: Noi next cua tail cu sang node moi
+        db.tail = moi;              // Dong 9: Cap nhat tail chinh thuc la node moi
+    }
+    cout << "Them lien he thanh cong!\n"; // Dong 10: Thong bao cho nguoi dung
+}
+\end{lstlisting}
+
+---
+
+\section{Cài đặt Thao tác Xóa Liên Hệ theo Số Điện Thoại (\texttt{xoaLienHe})}
+
+\subsection{Phân tích Thuật toán và 4 Trường hợp Biên}
+Xóa một phần tử trong danh sách liên kết đôi là thao tác phức tạp nhất trong phân hệ cơ bản do yêu cầu bẻ ghi liên kết hai chiều chính xác tuyệt đối. Nếu thao tác sai, danh sách sẽ bị đứt gãy hoặc gây rò rỉ bộ nhớ nghiêm trọng.
+
+Thuật toán thực hiện qua 2 giai đoạn:
+\begin{enumerate}
+    \item \textbf{Giai đoạn 1 (Tìm kiếm):} Dùng con trỏ con chạy $p$ xuất phát từ \texttt{head}, duyệt qua trường \texttt{next} cho đến khi gặp nút có \texttt{p->duLieu.sdt == sdt} hoặc duyệt hết danh sách ($p == \text{NULL}$).
+    \item \textbf{Giai đoạn 2 (Xóa nút và Cập nhật con trỏ):} Nếu tìm thấy $p$, phân tích vị trí của $p$ theo 4 trường hợp biên:
+\end{enumerate}
+
+\begin{table}[htbp]
+    \centering
+    \small
+    \begin{tabular}{|p{3.5cm}|p{6cm}|p{5.5cm}|}
+    \hline
+    \textbf{Trường hợp biên} & \textbf{Điều kiện nhận biết} & \textbf{Cơ chế cập nhật con trỏ} \\ \hline
+    \textbf{1. Nút duy nhất} & $p == \text{\texttt{db.head}}$ AND $p == \text{\texttt{db.tail}}$ & \texttt{db.head = NULL;} \newline \texttt{db.tail = NULL;} \\ \hline
+    \textbf{2. Nút đầu (\texttt{head})} & $p == \text{\texttt{db.head}}$ AND $p \neq \text{\texttt{db.tail}}$ & \texttt{db.head = p->next;} \newline \texttt{db.head->prev = NULL;} \\ \hline
+    \textbf{3. Nút cuối (\texttt{tail})} & $p \neq \text{\texttt{db.head}}$ AND $p == \text{\texttt{db.tail}}$ & \texttt{db.tail = p->prev;} \newline \texttt{db.tail->next = NULL;} \\ \hline
+    \textbf{4. Nút ở giữa} & $p \neq \text{\texttt{db.head}}$ AND $p \neq \text{\texttt{db.tail}}$ & \texttt{p->prev->next = p->next;} \newline \texttt{p->next->prev = p->prev;} \\ \hline
+    \end{tabular}
+    \caption{Tóm tắt 4 trường hợp biên khi thực hiện xóa nút khỏi Danh sách liên kết đôi}
+\end{table}
+
+Sau khi bẻ nối các liên kết con trỏ xung quanh, tiến hành thu hồi bộ nhớ nút $p$ bằng câu lệnh \texttt{delete p}.
+
+\subsection{Mã nguồn C++ và Giải thích Chi tiết}
+\begin{lstlisting}[language=C++, caption={Cài đặt hàm xoaLienHe}]
+bool xoaLienHe(DanhBa &db, string sdt) {
+    Node* p = db.head;                      // Dong 1: Khoi tao con tro p duyet tu head
+
+    // Dong 2-4: Tim nut chua SDT can xoa
+    while (p != NULL && p->duLieu.sdt != sdt) {
+        p = p->next;
+    }
+
+    if (p == NULL) {                        // Dong 5: Neu khong tim thay
+        cout << "Khong tim thay lien he!\n"; // Dong 6: Bao loi
+        return false;                       // Dong 7: Tra ve that bai
+    }
+
+    // Dong 8-12: Xu ly con tro prev cua nut phia sau
+    if (p->prev != NULL) {
+        p->prev->next = p->next;            // Cap nhat next cua nut dang truoc p
+    } else {
+        db.head = p->next;                  // p la head -> cap nhat head moi
+    }
+
+    // Dong 13-17: Xu ly con tro next cua nut phia truoc
+    if (p->next != NULL) {
+        p->next->prev = p->prev;            // Cap nhat prev cua nut dang sau p
+    } else {
+        db.tail = p->prev;                  // p la tail -> cap nhat tail moi
+    }
+
+    delete p;                               // Dong 18: Giai phong bo nho dong Heap
+    cout << "Xoa lien he thanh cong!\n";    // Dong 19: Thong bao thanh cong
+    return true;                            // Dong 20: Tra ve thanh cong
+}
+\end{lstlisting}
+
+---
+
+\section{Cài đặt Thao tác Duyệt Danh Bạ Hai Chiều}
+
+\subsection{Duyệt Xuôi (A - Z / Từ Head đến Tail)}
+Hàm \texttt{duyetXuoi} duyệt lần lượt tất cả các nút từ đầu đến cuối thông qua con trỏ \texttt{next}.
+
+\begin{lstlisting}[language=C++, caption={Cài đặt hàm duyetXuoi}]
+void duyetXuoi(const DanhBa& db) {
+    if (db.head == NULL) {
+        cout << "Danh ba hien tai dang rong.\n";
+        return;
+    }
+    cout << "\n================ DANH SACH LIEN HE (DUYET XUOI) ================\n";
+    Node* temp = db.head;
+    int stt = 1;
+    while (temp != NULL) {
+        cout << stt++ << ". " << temp->duLieu.ten << " - " << temp->duLieu.sdt << endl;
+        temp = temp->next;
+    }
+}
+\end{lstlisting}
+
+\subsection{Duyệt Ngược (Z - A / Từ Tail về Head)}
+Hàm \texttt{duyetNguoc} tận dụng ưu thế con trỏ \texttt{prev} của danh sách liên kết đôi để xuất danh sách theo chiều ngược lại từ cuối về đầu.
+
+\begin{lstlisting}[language=C++, caption={Cài đặt hàm duyetNguoc}]
+void duyetNguoc(const DanhBa& db) {
+    if (db.tail == NULL) {
+        cout << "Danh ba hien tai dang rong.\n";
+        return;
+    }
+    cout << "\n================ DANH SACH LIEN HE (DUYET NGUOC) ================\n";
+    Node* temp = db.tail;
+    int stt = 1;
+    while (temp != NULL) {
+        cout << stt++ << ". " << temp->duLieu.ten << " - " << temp->duLieu.sdt << endl;
+        temp = temp->prev;
+    }
+}
+\end{lstlisting}
+
+---
+
+\section{Phân tích Độ phức tạp Thuật toán và Bảng Kịch bản Kiểm thử}
+
+\subsection{Đánh giá Độ phức tạp Thuật toán (Complexity Analysis)}
+Dựa trên thiết kế giải thuật, ta lập bảng đánh giá độ phức tạp thời gian (\textit{Time Complexity}) và độ phức tạp không gian (\textit{Space Complexity}):
+
+\begin{table}[htbp]
+    \centering
+    \small
+    \begin{tabular}{|l|c|c|p{6.5cm}|}
+    \hline
+    \textbf{Tên thao tác} & \textbf{Thời gian (Best)} & \textbf{Thời gian (Worst)} & \textbf{Không gian (Space)} \\ \hline
+    \texttt{KhoiTaoDanhBa} & $O(1)$ & $O(1)$ & $O(1)$ - Không tốn bộ nhớ phụ. \\ \hline
+    \texttt{TaoNode} & $O(1)$ & $O(1)$ & $O(1)$ - Cấp phát đúng 1 Node. \\ \hline
+    \texttt{themLienHe} & $O(1)$ & $O(1)$ & $O(1)$ - Chèn đuôi tức thì nhờ con trỏ \texttt{tail}. \\ \hline
+    \texttt{xoaLienHe} & $O(1)$ (Nút đầu) & $O(n)$ (Nút cuối/Không tìm thấy) & $O(1)$ - Chỉ tốn 1 con trỏ duyệt. \\ \hline
+    \texttt{duyetXuoi} & $O(n)$ & $O(n)$ & $O(1)$ - Duyệt qua $n$ phần tử. \\ \hline
+    \texttt{duyetNguoc} & $O(n)$ & $O(n)$ & $O(1)$ - Duyệt qua $n$ phần tử. \\ \hline
+    \end{tabular}
+    \caption{Bảng đánh giá độ phức tạp thuật toán các hàm thuộc Phân hệ Cơ bản}
+\end{table}
+
+\subsection{Kịch bản Kiểm thử Thực tế (Test Cases)}
+Để xác minh tính chính xác của chương trình, các ca kiểm thử sau đã được thực thi:
+
+\begin{table}[htbp]
+    \centering
+    \small
+    \begin{tabular}{|c|p{4cm}|p{5.5cm}|p{4.5cm}|}
+    \hline
+    \textbf{STT} & \textbf{Tên Test Case} & \textbf{Dữ liệu đầu vào} & \textbf{Kết quả kỳ vọng} \\ \hline
+    TC01 & Thêm vào danh bạ rỗng & Thêm ("Nguyen Van A", "0901") & \texttt{head} và \texttt{tail} cùng trỏ đến Node A. \\ \hline
+    TC02 & Thêm liên tiếp nhiều nút & Thêm ("Tran B", "0902"), ("Le C", "0903") & \texttt{head} trỏ Node A, \texttt{tail} trỏ Node C. Liên kết 2 chiều chính xác. \\ \hline
+    TC03 & Xóa nút ở giữa & Gọi \texttt{xoaLienHe("0902")} & Node B bị giải phóng, Node A nối trực tiếp Node C. \\ \hline
+    TC04 & Xóa nút đầu (\texttt{head}) & Gọi \texttt{xoaLienHe("0901")} & \texttt{head} mới dịch chuyển sang Node C, Node C.\texttt{prev} = \text{NULL}. \\ \hline
+    TC05 & Xóa nút duy nhất & Gọi \texttt{xoaLienHe("0903")} & Danh bạ trở về rỗng, \texttt{head} = \text{NULL}, \texttt{tail} = \text{NULL}. \\ \hline
+    TC06 & Xóa SĐT không tồn tại & Gọi \texttt{xoaLienHe("0000")} & Hàm trả về \texttt{false}, xuất thông báo không tìm thấy. \\ \hline
+    \end{tabular}
+    \caption{Bảng kết quả các kịch bản kiểm thử chương trình}
+\end{table}
+
+---
+
+\section{Kết luận Chương}
+Phân hệ quản lý cơ bản do Thành viên 3 phụ trách đã xây dựng hoàn chỉnh và tối ưu toàn bộ các thao tác nền tảng của danh bạ điện thoại dựa trên cấu trúc Danh sách liên kết đôi. Các thuật toán khởi tạo, thêm, xóa, duyệt hai chiều đều được thiết kế chặt chẽ, xử lý đầy đủ các trường hợp biên và kiểm soát rò rỉ bộ nhớ nghiêm ngặt, tạo tiền đề vững chắc cho việc ghép nối với các phân hệ nâng cao của các thành viên khác trong nhóm.
+\end{document}
