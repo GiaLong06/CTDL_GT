@@ -1,0 +1,205 @@
+\documentclass[12pt,a4paper]{report}
+\usepackage[a4paper,top=2.5cm,bottom=2.5cm,left=3cm,right=2cm]{geometry}
+\usepackage{fontspec}
+\setmainfont{Liberation Serif}
+\usepackage{polyglossia}
+\setdefaultlanguage{vietnamese}
+\usepackage{array,tabularx,longtable,booktabs}
+\usepackage{enumitem}
+\usepackage{microtype}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true,linkcolor=black,urlcolor=blue}
+\usepackage{fancyhdr}
+\usepackage{caption}
+\setlength{\parindent}{1.25cm}
+\setlength{\parskip}{3pt}
+\renewcommand{\arraystretch}{1.25}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[R]{Quản lý danh bạ điện thoại và lịch sử cuộc gọi}
+\fancyfoot[C]{\thepage}
+\begin{document}
+\begin{titlepage}
+\centering
+{\Large BÁO CÁO BÀI TẬP LỚN\par}
+\vspace{1.5cm}
+{\huge\bfseries QUẢN LÝ DANH BẠ ĐIỆN THOẠI\par}
+\vspace{0.3cm}
+{\huge\bfseries VÀ LỊCH SỬ CUỘC GỌI\par}
+\vspace{1.5cm}
+{\large Học phần: Cấu trúc dữ liệu và Giải thuật\par}
+\vfill
+{\large Nhóm thực hiện\par}
+\vspace{2cm}
+{\large \today\par}
+\end{titlepage}
+\pagenumbering{roman}
+\tableofcontents
+\clearpage
+\pagenumbering{arabic}
+\chapter*{LỜI CẢM ƠN}\addcontentsline{toc}{chapter}{Lời cảm ơn}
+
+Tập thể nhóm chúng em xin chân thành cảm ơn Cô Trần Thị Dung phụ trách học phần Cấu trúc dữ liệu và Giải thuật đã có những bài giảng cung cấp kiến thức nền tảng đối với môn học và định hướng để nhóm thực hiện bài tập lớn với đề tài “Quản lý Danh bạ Điện thoại và Lịch sử cuộc gọi”.\par
+Trong quá trình thực hiện, nhóm đã có cơ hội được vận dụng các kiến thức từ cơ bản đến nâng cao , từ đơn giản đến phức tạp hơn về tổ chức dữ liệu, thao tác thêm và xóa phần tử, tìm kiếm, sắp xếp, duyệt dữ liệu cũng như đọc và ghi dữ liệu từ tệp trong môn Cấu trúc dữ liệu và giải thuật. Đây là cơ hội để nhóm củng cố  sâu hơn về kiến thức lý thuyết và nhận rõ hơn cách áp dụng cấu trúc dữ liệu vào một bài toán sát với thực tế đời sống . Để chúng biết mình đang học gì và cần học thêm gì để có thể phát triển cơ hội nghề nghiệp.\par
+Do thời gian thực hiện và kinh nghiệm còn hạn chế, Bài tập lớn của nhóm khó tránh khỏi việc còn nhiều thiếu sót. Nhóm rất mong nhận được ý kiến đóng góp của cô để bài làm được hoàn thiện hơn. Nhóm xin chân thành cảm ơn!\par
+Nhóm thực hiện\par
+\chapter*{LỜI NÓI ĐẦU}\addcontentsline{toc}{chapter}{Lời nói đầu}
+
+Điện thoại là phương tiện liên lạc phổ biến trong học tập, công việc và đời sống. Cùng với nhu cầu liên lạc, người dùng cần lưu trữ thông tin liên hệ một cách có hệ thống, tìm kiếm nhanh số điện thoại, cập nhật thông tin khi cần và xem lại những cuộc gọi gần đây. Nếu dữ liệu chỉ được lưu dưới dạng danh sách đơn giản hoặc xử lý thủ công, việc quản lý có thể trở nên bất tiện khi số lượng liên hệ tăng lên.\par
+Từ nhu cầu đó, nhóm lựa chọn đề tài : “Quản lý Danh bạ Điện thoại và Lịch sử cuộc gọi”. Chương trình hướng đến việc quản lý thông tin liên hệ, hỗ trợ thêm, xóa, sắp xếp, tìm kiếm theo tiền tố, duyệt danh bạ theo hai chiều và lưu lại lịch sử cuộc gọi gần nhất. Dữ liệu có thể được đọc từ tệp khi khởi động và ghi lại vào tệp để sử dụng ở những lần chạy tiếp theo.\par
+Thông qua đề tài, nhóm tập trung vận dụng kiến thức của học phần, đặc biệt là việc lựa chọn cấu trúc dữ liệu phù hợp với từng thao tác và phân tích hiệu quả thuật toán. Báo cáo trình bày tổng quan về đề tài, phân tích bài toán thực tế và xác định các yêu cầu của chương trình. Đây là cơ sở để lựa chọn cấu trúc dữ liệu, xây dựng thuật toán và triển khai các chức năng trong những chương tiếp theo.\par
+\chapter{TỔNG QUAN ĐỀ TÀI VÀ PHÂN TÍCH BÀI TOÁN}
+
+\section{GIỚI THIỆU TỔNG QUAN ĐỀ TÀI}
+
+Đề tài “Quản lý danh bạ điện thoại và lịch sử cuộc gọi” nhằm xây dựng một chương trình hỗ trợ người dùng quản lý thông tin liên hệ và theo dõi lịch sử cuộc gọi. Hệ thống cung cấp các chức năng như thêm mới, cập nhật, tìm kiếm liên hệ theo tên hoặc số điện thoại, sắp xếp danh bạ theo tiêu chí nhất định và xem lại các cuộc gọi gần đây.\par
+Mỗi liên hệ được mô hình hóa bằng các thông tin cơ bản gồm mã liên hệ, họ tên, số điện thoại, địa chỉ thư điện tử và ghi chú. Đối với lịch sử cuộc gọi, mỗi bản ghi bao gồm số điện thoại liên quan, thời điểm gọi, loại cuộc gọi (gọi đi, gọi đến hoặc cuộc gọi nhỡ) và thời lượng nếu có dữ liệu. Việc xác định các trường thông tin này giúp chương trình tổ chức dữ liệu rõ ràng, thuận tiện cho quá trình quản lý và tra cứu.\par
+Phạm vi bài tập tập trung vào việc lưu trữ và xử lý dữ liệu trong ứng dụng, không kết nối trực tiếp với mạng viễn thông hoặc tự động lấy nhật ký từ thiết bị điện thoại. Lịch sử cuộc gọi được tạo hoặc cập nhật thông qua các thao tác mô phỏng trong chương trình.\par
+Thông qua đề tài trong môn Cấu trúc dữ liệu và Giải thuật, nhóm có cơ hội vận dụng kiến thức đã học vào một bài toán thực tế, đồng thời tìm hiểu sâu hơn về cách tổ chức dữ liệu và lựa chọn cấu trúc dữ liệu phù hợp. Bên cạnh đó, việc xây dựng các chức năng tìm kiếm, sắp xếp và cập nhật thông tin giúp nhóm rèn luyện tư duy thuật toán, hiểu rõ hơn về hiệu quả của các phương pháp xử lý dữ liệu và củng cố kiến thức đã học.\par
+\section{PHÂN TÍCH NHU CẦU THỰC TẾ}
+
+\subsection{Nhu cầu lưu trữ và cập nhật danh bạ linh hoạt}
+
+Trong quá trình sử dụng điện thoại, danh bạ của người dùng thường xuyên có sự thay đổi do phát sinh các mối quan hệ mới, thay đổi số điện thoại hoặc không còn nhu cầu liên lạc với một số người. Vì vậy, người dùng cần một chương trình cho phép quản lý danh bạ một cách linh hoạt, hỗ trợ thêm mới, chỉnh sửa và xóa các liên hệ khi cần thiết. Mỗi liên hệ cần được lưu trữ với những thông tin cơ bản như mã liên hệ, họ tên, số điện thoại, địa chỉ thư điện tử và ghi chú để thuận tiện cho việc nhận biết và tra cứu.\par
+Bên cạnh đó, chương trình cần giúp người dùng dễ dàng cập nhật thông tin mà không phải thực hiện quá nhiều thao tác phức tạp. Chẳng hạn, khi một người thay đổi số điện thoại, người dùng có thể chỉnh sửa thông tin tương ứng thay vì phải xóa toàn bộ liên hệ và tạo lại từ đầu. Đối với thao tác xóa, chương trình cần xác định đúng liên hệ được lựa chọn nhằm hạn chế việc xóa nhầm dữ liệu. Từ những nhu cầu này, nhóm hướng đến xây dựng chức năng quản lý danh bạ đơn giản, dễ sử dụng và đáp ứng được các tình huống thường gặp trong thực tế.\par
+\subsection{Nhu cầu tìm kiếm nhanh theo tiền tố}
+
+Khi số lượng liên hệ trong danh bạ tăng lên, việc tìm kiếm thủ công từng người sẽ mất nhiều thời gian và gây bất tiện cho người dùng. Trong nhiều trường hợp, người dùng không nhớ đầy đủ họ tên hoặc số điện thoại mà chỉ nhớ một vài ký tự ở đầu thông tin cần tìm. Do đó, chương trình cần hỗ trợ tìm kiếm theo tiền tố, cho phép người dùng nhập một chuỗi ký tự ban đầu để tìm các liên hệ có tên hoặc số điện thoại bắt đầu bằng chuỗi đó.\par
+Ví dụ, khi người dùng nhập “Nguy”, chương trình có thể hiển thị các liên hệ có tên bắt đầu bằng chuỗi ký tự này. Tương tự, người dùng có thể nhập một vài chữ số đầu của số điện thoại để tìm những liên hệ phù hợp. Kết quả tìm kiếm cần được trình bày rõ ràng, bao gồm các thông tin cần thiết để người dùng xác định đúng người cần liên lạc. Nếu không có kết quả phù hợp, chương trình nên thông báo để người dùng biết và có thể điều chỉnh nội dung tìm kiếm. Ngoài ra, cách xử lý chữ hoa, chữ thường và khoảng trắng cần được quy định thống nhất nhằm giúp chức năng tìm kiếm hoạt động dễ hiểu và thuận tiện hơn.\par
+\subsection{Nhu cầu duyệt danh bạ theo hai chiều}
+
+Bên cạnh chức năng tìm kiếm, người dùng còn có nhu cầu xem và kiểm tra lần lượt các liên hệ đã lưu trong danh bạ. Chẳng hạn, khi muốn rà soát thông tin của nhiều người hoặc tìm một liên hệ nằm gần vị trí đang xem, người dùng có thể cần chuyển sang liên hệ kế tiếp hoặc quay lại liên hệ trước đó. Vì vậy, chương trình nên hỗ trợ việc duyệt danh bạ theo cả hai chiều, giúp người dùng di chuyển giữa các liên hệ một cách thuận tiện mà không cần thực hiện lại thao tác tìm kiếm sau mỗi lần xem.\par
+Thông qua chức năng này, người dùng có thể kiểm tra thông tin của từng liên hệ, xem các dữ liệu đã lưu và chuyển đổi giữa các mục trong danh sách khi cần thiết. Chương trình cũng cần xử lý hợp lý các trường hợp người dùng đang ở liên hệ đầu tiên hoặc cuối cùng để tránh thao tác vượt khỏi phạm vi danh sách. Từ góc độ xây dựng chương trình, nhóm cần xem xét cách tổ chức danh bạ sao cho việc di chuyển giữa các liên hệ diễn ra thuận tiện, đồng thời phù hợp với những thao tác mà người dùng thường thực hiện.\par
+\subsection{Nhu cầu theo dõi lịch sử cuộc gọi gần đây}
+
+Trong quá trình liên lạc hằng ngày, người dùng có thể cần xem lại những cuộc gọi đã thực hiện, các cuộc gọi đến hoặc những cuộc gọi nhỡ để ghi nhớ thông tin và chủ động liên lạc lại khi cần. Vì vậy, chương trình cần cung cấp chức năng quản lý lịch sử cuộc gọi, giúp người dùng theo dõi những hoạt động liên lạc đã được ghi nhận trong hệ thống. Mỗi bản ghi lịch sử có thể bao gồm số điện thoại liên quan, thời điểm gọi, loại cuộc gọi như gọi đi, gọi đến hoặc cuộc gọi nhỡ và thời lượng nếu có dữ liệu.\par
+Để thuận tiện cho việc theo dõi, lịch sử cuộc gọi nên được hiển thị theo thứ tự thời gian, trong đó các cuộc gọi mới nhất được đặt ở vị trí đầu tiên. Người dùng có thể dựa vào thông tin này để nhận biết những cuộc gọi gần đây, kiểm tra số điện thoại đã liên lạc hoặc xác định những cuộc gọi nhỡ cần xử lý. Ngoài ra, chương trình cần phân biệt rõ dữ liệu danh bạ với dữ liệu lịch sử cuộc gọi, bởi một người có thể xuất hiện trong nhiều bản ghi khác nhau. Trong phạm vi bài tập, lịch sử cuộc gọi được tạo hoặc cập nhật thông qua các thao tác mô phỏng trong chương trình, không tự động lấy dữ liệu từ thiết bị điện thoại. Nhóm cũng có thể đặt giới hạn số lượng bản ghi được lưu nhằm giúp việc quản lý dữ liệu phù hợp với phạm vi thực hiện đề tài.\par
+\subsection{Nhu cầu lưu trữ và khôi phục dữ liệu}
+
+Một trong những nhu cầu quan trọng của người dùng là giữ lại thông tin đã nhập sau khi kết thúc quá trình sử dụng chương trình. Nếu dữ liệu chỉ được lưu trong bộ nhớ tạm thời, danh bạ và lịch sử cuộc gọi có thể bị mất khi chương trình đóng lại, khiến người dùng phải nhập lại thông tin từ đầu. Điều này gây bất tiện và làm giảm tính hữu ích của chương trình. Vì vậy, hệ thống cần hỗ trợ lưu trữ dữ liệu vào tệp để các thông tin đã quản lý có thể được sử dụng lại trong những lần khởi động tiếp theo.\par
+Bên cạnh việc lưu dữ liệu, chương trình cần có khả năng đọc và khôi phục thông tin từ tệp khi bắt đầu hoạt động. Quá trình này giúp danh bạ và lịch sử cuộc gọi được duy trì giữa các lần sử dụng, đồng thời tạo điều kiện để người dùng tiếp tục cập nhật dữ liệu mà không phải xây dựng lại danh sách. Để đảm bảo việc lưu trữ và khôi phục diễn ra hợp lý, chương trình cần thống nhất định dạng dữ liệu, kiểm tra tình trạng tệp và xử lý những trường hợp như tệp chưa tồn tại, không thể mở tệp hoặc nội dung không đúng định dạng dự kiến. Từ đó, nhóm hướng đến xây dựng chức năng lưu trữ đơn giản, dễ kiểm tra và phù hợp với yêu cầu của bài tập lớn, góp phần hạn chế nguy cơ mất dữ liệu trong quá trình sử dụng.\par
+\section{MỤC TIÊU VÀ PHẠM VI CỦA HỆ THỐNG}
+
+\subsection{Mục tiêu}
+
+Các mục tiêu chính của chương trình gồm:\par
+\begin{itemize}[leftmargin=1.2cm]
+\item Quản lý danh sách liên hệ với các thông tin cơ bản và cho phép cập nhật dữ liệu.
+\item Hỗ trợ tìm kiếm liên hệ theo tên hoặc số điện thoại, bao gồm tìm kiếm theo tiền tố.
+\item Cho phép sắp xếp danh bạ theo tiêu chí xác định, chẳng hạn họ tên hoặc số điện thoại.
+\item Hỗ trợ duyệt danh bạ theo hai chiều.
+\item Ghi nhận và hiển thị các cuộc gọi gần nhất theo thứ tự thời gian.
+\item Đọc dữ liệu ban đầu từ tệp và ghi dữ liệu đã cập nhật ra tệp.
+\item Vận dụng các cấu trúc dữ liệu và thuật toán phù hợp, đồng thời đánh giá độ phức tạp của những thao tác chính.
+\end{itemize}
+
+\subsection{Phạm vi thực hiện}
+
+Đề tài tập trung vào chương trình quản lý chạy cục bộ phục vụ mục đích học tập. Các chức năng gọi điện thực tế, đồng bộ danh bạ qua Internet, xác thực tài khoản, mã hóa dữ liệu chuyên sâu và tích hợp hệ điều hành không thuộc phạm vi bắt buộc, trừ khi nhóm chủ động mở rộng. Những lựa chọn về cấu trúc dữ liệu cuối cùng cần được thống nhất với phần thiết kế và cài đặt của nhóm.\par
+\section{XÁC ĐỊNH TÁC NHÂN VÀ TƯƠNG TÁC VỚI HỆ THỐNG}
+
+Trong phạm vi đề tài xây dựng phần mềm quản lý danh bạ điện thoại và lịch sử cuộc gọi bằng ngôn ngữ C++, tác nhân chính tương tác với hệ thống là Người dùng. Người dùng thực hiện các thao tác thông qua giao diện dòng lệnh (Console) được xây dựng bằng các câu lệnh nhập và xuất dữ liệu.\par
+Các tương tác giữa người dùng và hệ thống được xác định như sau:\par
+\noindent\textbf{Quản lý danh bạ:} Thêm liên hệ mới, xóa liên hệ theo số điện thoại, hiển thị danh bạ theo thứ tự xuôi hoặc ngược và sắp xếp danh bạ theo tên từ A đến Z.\par
+\noindent\textbf{Tra cứu danh bạ:} Tìm kiếm liên hệ dựa trên tiền tố của tên. Chương trình hiển thị tên và số điện thoại của các liên hệ phù hợp với từ khóa nhập vào.\par
+\noindent\textbf{Quản lý lịch sử cuộc gọi:} Nhập số điện thoại cần gọi để tạo bản ghi mô phỏng và xem danh sách lịch sử cuộc gọi. Bản ghi mới được đưa lên đầu danh sách.\par
+\noindent\textbf{Quản lý dữ liệu lưu trữ:} Đọc dữ liệu danh bạ từ tệp danhba.txt và ghi danh bạ hiện tại vào tệp để sử dụng trong những lần chạy tiếp theo.\par
+\noindent\textbf{Kết thúc chương trình:} Giải phóng bộ nhớ được cấp phát động cho danh bạ và lịch sử cuộc gọi trước khi kết thúc chương trình.\par
+Trong hệ thống, tệp \texttt{danhba.txt} đóng vai trò là nơi lưu trữ dữ liệu danh bạ. Chương trình hiện chỉ thực hiện đọc và ghi thông tin tên, số điện thoại của các liên hệ; lịch sử cuộc gọi chưa được lưu vào tệp.\par
+Nếu sử dụng sơ đồ Use Case, tác nhân “Người dùng” được đặt bên ngoài ranh giới hệ thống và liên kết với các chức năng tương ứng. Tệp dữ liệu được xem là thành phần lưu trữ mà chương trình tương tác, không nhất thiết phải biểu diễn như một tác nhân độc lập.\par
+\section{PHÂN TÍCH YÊU CẦU CỦA CHƯƠNG TRÌNH}
+
+Dựa trên mục tiêu của đề tài và các chức năng đã được triển khai trong mã nguồn C++, hệ thống được phân tích theo hai nhóm yêu cầu chính: yêu cầu chức năng và yêu cầu phi chức năng. Việc xác định các yêu cầu này giúp làm rõ phạm vi hoạt động của chương trình, đồng thời tạo cơ sở để đánh giá cấu trúc dữ liệu, thuật toán và hiệu quả thực hiện.\par
+\subsection{Yêu cầu chức năng}
+
+Các yêu cầu chức năng mô tả những thao tác mà người dùng có thể thực hiện trực tiếp trên chương trình. Đối chiếu với mã nguồn hiện tại, hệ thống có các chức năng được tổng hợp trong Bảng 1.1.\par
+\begin{table}[htbp]\centering\caption{Các yêu cầu chức năng của chương trình}\label{tab:chucnang}
+\begin{tabularx}{\textwidth}{|>{\centering\arraybackslash}p{1.1cm}|p{3.4cm}|X|}\hline\textbf{Mã} & \textbf{Chức năng} & \textbf{Mô tả} \\ \hline
+F01 & Thêm liên hệ & Cho phép người dùng nhập tên và số điện thoại để thêm một liên hệ mới vào cuối danh sách liên kết kép. \\ \hline
+F02 & Xóa liên hệ & Tìm kiếm liên hệ theo số điện thoại và xóa nút tương ứng khỏi danh sách. Nếu không tìm thấy số điện thoại, chương trình thông báo cho người dùng. \\ \hline
+F03 & Hiển thị danh bạ theo chiều xuôi & Duyệt danh sách từ nút đầu (head) đến nút cuối (tail) và hiển thị tên, số điện thoại của từng liên hệ. \\ \hline
+F04 & Hiển thị danh bạ theo chiều ngược & Duyệt danh sách từ nút cuối (tail) về nút đầu (head) thông qua con trỏ prev. \\ \hline
+F05 & Sắp xếp danh bạ & Sắp xếp các liên hệ theo tên từ A đến Z bằng thuật toán sắp xếp nổi bọt (Bubble Sort). \\ \hline
+F06 & Tìm kiếm theo tiền tố tên & Tìm các liên hệ có tên bắt đầu bằng chuỗi ký tự do người dùng nhập. Kết quả hiển thị gồm tên và số điện thoại. \\ \hline
+F07 & Ghi nhận cuộc gọi mô phỏng & Nhận số điện thoại do người dùng nhập và tạo một bản ghi trong danh sách lịch sử liên kết đơn. Bản ghi mới được chèn vào đầu danh sách. \\ \hline
+F08 & Xem lịch sử cuộc gọi & Hiển thị các số điện thoại đã được ghi nhận, theo thứ tự bản ghi mới nhất trước. \\ \hline
+F09 & Đọc dữ liệu danh bạ từ tệp & Đọc lần lượt tên và số điện thoại từ tệp danhba.txt, sau đó thêm các liên hệ đọc được vào danh sách trong bộ nhớ. \\ \hline
+F10 & Ghi dữ liệu danh bạ ra tệp & Ghi tên và số điện thoại của các liên hệ hiện có vào tệp danhba.txt theo từng dòng. \\ \hline
+F11 & Giải phóng bộ nhớ & Giải phóng các nút được cấp phát động của danh bạ và lịch sử cuộc gọi khi người dùng chọn thoát chương trình. \\ \hline
+\end{tabularx}\end{table}
+
+\noindent\textbf{Lưu ý về phạm vi chức năng:} Mã nguồn hiện tại chưa triển khai chức năng cập nhật thông tin liên hệ, tìm kiếm theo số điện thoại để tra cứu, lưu thời điểm gọi, phân loại cuộc gọi, ghi nhận thời lượng cuộc gọi, giới hạn số lượng bản ghi lịch sử hoặc lưu lịch sử cuộc gọi vào tệp. Vì vậy, các nội dung này không được xem là chức năng đã hoàn thành của hệ thống.\par
+Ngoài ra, chương trình chưa kiểm tra số điện thoại trùng lặp khi thêm liên hệ. Khi đọc tệp, dữ liệu được bổ sung vào danh bạ hiện có thay vì thay thế toàn bộ danh bạ, do đó người dùng cần lưu ý tránh đọc cùng một tệp nhiều lần nếu không muốn xuất hiện các bản ghi trùng.\par
+\subsection{Yêu cầu phi chức năng}
+
+Bên cạnh các chức năng chính, chương trình cần đáp ứng những yêu cầu phi chức năng liên quan đến tính đúng đắn, khả năng sử dụng, hiệu quả xử lý và khả năng bảo trì.\par
+\begin{itemize}[leftmargin=1.2cm]
+\item 
+\end{itemize}
+
+\noindent\textbf{Tính đúng đắn:} Các thao tác thêm, xóa, sắp xếp, tìm kiếm và duyệt danh bạ cần xử lý đúng dữ liệu. Khi xóa một nút, các con trỏ prev và next phải được cập nhật phù hợp để duy trì tính liên kết của danh sách.\par
+\noindent\textbf{Tính nhất quán dữ liệu:} Thông tin hiển thị trên màn hình và thông tin được ghi vào tệp phải tương ứng với dữ liệu hiện có trong bộ nhớ tại thời điểm lưu. Do lịch sử cuộc gọi chưa được lưu vào tệp nên dữ liệu lịch sử chỉ tồn tại trong thời gian chương trình đang chạy.\par
+\noindent\textbf{Khả năng sử dụng:} Giao diện dòng lệnh cung cấp menu đánh số để người dùng lựa chọn chức năng. Chương trình có thông báo khi không tìm thấy liên hệ, khi không có lịch sử cuộc gọi hoặc khi xảy ra lỗi mở tệp.\par
+\noindent\textbf{Khả năng xử lý dữ liệu:} Chương trình sử dụng danh sách liên kết kép cho danh bạ và danh sách liên kết đơn cho lịch sử cuộc gọi, đáp ứng các thao tác duyệt và bổ sung bản ghi theo thiết kế. Tuy nhiên, các thao tác tìm kiếm vẫn cần duyệt tuần tự qua danh sách.\par
+\noindent\textbf{Quản lý bộ nhớ:} Các nút được cấp phát bằng new cần được giải phóng bằng delete khi không còn sử dụng. Chương trình đã xây dựng các hàm giải phóng bộ nhớ cho danh bạ và lịch sử cuộc gọi nhằm hạn chế tình trạng rò rỉ bộ nhớ khi kết thúc.\par
+\noindent\textbf{Khả năng bảo trì:} Các chức năng được tách thành những hàm riêng như themLienHe(), xoaLienHe(), SapXepDanhBa(), TimKiemTheoTen(), ghiFile(), docFile() và các hàm xử lý lịch sử cuộc gọi. Cách tổ chức này giúp chương trình dễ đọc, kiểm tra và mở rộng.\par
+\noindent\textbf{Khả năng lưu trữ:} Dữ liệu danh bạ được lưu bằng tệp văn bản danhba.txt, có định dạng mỗi liên hệ gồm hai dòng: dòng thứ nhất là tên, dòng thứ hai là số điện thoại. Chương trình hiện chưa có cơ chế lưu trữ bền vững đối với lịch sử cuộc gọi.\par
+\section{ĐỊNH HƯỚNG LỰA CHỌN CẤU TRÚC DỮ LIỆU VÀ THUẬT TOÁN}
+
+Việc lựa chọn cấu trúc dữ liệu và thuật toán được thực hiện dựa trên các yêu cầu thao tác của chương trình quản lý danh bạ và lịch sử cuộc gọi. Trong mã nguồn hiện tại, hai cấu trúc dữ liệu chính được sử dụng là danh sách liên kết kép và danh sách liên kết đơn. Ngoài ra, chương trình sử dụng thuật toán sắp xếp nổi bọt để sắp xếp danh bạ theo tên.\par
+\subsection{Cấu trúc dữ liệu danh bạ}
+
+Danh bạ được tổ chức bằng danh sách liên kết kép (Doubly Linked List). Mỗi liên hệ được lưu trong cấu trúc \texttt{LienHe}, gồm hai trường dữ liệu là ten và sdt. Cấu trúc \texttt{Node} chứa thông tin liên hệ cùng hai con trỏ \texttt{prev} và \texttt{next}, lần lượt trỏ đến nút đứng trước và nút đứng sau.\par
+Cấu trúc \texttt{DanhBa} quản lý danh sách thông qua hai con trỏ \texttt{head} và \texttt{tail}, tương ứng với nút đầu và nút cuối.\par
+\noindent\textbf{Lý do lựa chọn danh sách liên kết kép:} \par
+Hỗ trợ duyệt danh bạ theo cả hai chiều nhờ hai con trỏ \texttt{prev} và \texttt{next}.\par
+Cho phép thêm liên hệ vào cuối danh sách bằng con trỏ \texttt{tail}.\par
+Hỗ trợ xóa một liên hệ khi đã tìm được nút cần xóa bằng cách cập nhật các liên kết xung quanh nút đó.\par
+Không yêu cầu cấp phát một vùng nhớ liên tục có kích thước cố định như mảng thông thường.\par
+Tuy nhiên, danh sách liên kết kép không hỗ trợ truy cập trực tiếp theo chỉ số. Vì vậy, các thao tác tìm kiếm theo tên hoặc số điện thoại vẫn cần duyệt qua các nút trong danh sách.\par
+\subsection{Cấu trúc dữ liệu lịch sử cuộc gọi}
+
+Lịch sử cuộc gọi được tổ chức bằng danh sách liên kết đơn (Singly Linked List). Mỗi nút \texttt{Node}LichSu lưu một số điện thoại và con trỏ \texttt{next} trỏ đến bản ghi kế tiếp. Cấu trúc \texttt{LichSuCuocGoi} quản lý danh sách thông qua con trỏ \texttt{head}.\par
+Khi người dùng thực hiện thao tác mô phỏng cuộc gọi, hàm \texttt{GhiNhanCuocGoi()} tạo một nút mới, gán số điện thoại được nhập vào nút đó rồi liên kết nút mới với đầu danh sách hiện tại. Sau đó, con trỏ \texttt{head} được cập nhật để trỏ đến nút vừa tạo.\par
+Phương pháp chèn đầu danh sách có các ưu điểm:\par
+Thao tác thêm bản ghi mới có độ phức tạp thời gian \texttt{O(1)}.\par
+Bản ghi mới nhất luôn nằm ở đầu danh sách.\par
+Việc duyệt và hiển thị lịch sử được thực hiện đơn giản thông qua con trỏ \texttt{next}.\par
+Cấu trúc dữ liệu phù hợp với yêu cầu ghi nhận các số điện thoại đã nhập trong thời gian chương trình chạy.\par
+Hạn chế của phương án hiện tại là mỗi bản ghi chỉ lưu số điện thoại. Chương trình chưa lưu thời điểm gọi, loại cuộc gọi hoặc thời lượng; đồng thời chưa giới hạn số lượng bản ghi và chưa ghi lịch sử vào tệp.\par
+\subsection{Thuật toán sắp xếp danh bạ}
+
+Chương trình sử dụng thuật toán sắp xếp nổi bọt (Bubble Sort) để sắp xếp danh bạ theo tên từ A đến Z. Thuật toán so sánh tên của hai nút liền kề. Nếu tên ở nút trước lớn hơn tên ở nút sau theo thứ tự so sánh chuỗi của C++, chương trình hoán đổi hai đối tượng \texttt{LienHe}.\par
+Quá trình so sánh được lặp lại cho đến khi không còn cặp phần tử nào cần hoán đổi. Biến swapped được sử dụng để xác định liệu danh sách có thay đổi trong một lượt duyệt hay không, còn lastPtr giúp giới hạn phạm vi so sánh ở những lượt tiếp theo.\par
+Ưu điểm của thuật toán là dễ hiểu, dễ cài đặt và phù hợp với mục tiêu học tập về cấu trúc dữ liệu và giải thuật. Độ phức tạp thời gian trong trường hợp trung bình và trường hợp xấu nhất là \texttt{O(n²)}, với (n) là số lượng liên hệ. Trường hợp danh sách đã được sắp xếp, thuật toán có thể kết thúc sau một lượt duyệt, tương ứng \texttt{O(n)}.\par
+Cần lưu ý rằng việc sắp xếp hiện tại dựa trên phép so sánh chuỗi thông thường của C++. Do đó, thứ tự tên tiếng Việt có dấu chưa được xử lý theo quy tắc bảng chữ cái tiếng Việt chuyên biệt. Nếu cần sắp xếp chính xác theo quy tắc ngôn ngữ, chương trình cần bổ sung cơ chế so sánh chuỗi phù hợp.\par
+\subsection{Thuật toán tìm kiếm và duyệt danh bạ}
+
+Chức năng tìm kiếm được thực hiện bằng phương pháp duyệt tuần tự. Chương trình bắt đầu từ \texttt{head}, kiểm tra tên của từng liên hệ bằng biểu thức \texttt{find(tenCantim) == 0} và hiển thị các liên hệ có tên bắt đầu bằng chuỗi tìm kiếm.\par
+Thuật toán này dễ cài đặt và không yêu cầu cấu trúc dữ liệu phụ. Độ phức tạp thời gian là \texttt{O(n)} lần kiểm tra liên hệ trong trường hợp thông thường, chưa kể chi phí so sánh chuỗi.\par
+Đối với chức năng duyệt danh bạ, chương trình sử dụng con trỏ \texttt{next} để duyệt xuôi và con trỏ \texttt{prev} để duyệt ngược. Mỗi nút được truy cập một lần nên độ phức tạp thời gian của mỗi lượt duyệt là \texttt{O(n)}.\par
+\subsection{Phương pháp lưu trữ dữ liệu bằng tệp}
+
+Chương trình sử dụng tệp văn bản \texttt{danhba.txt} để lưu trữ dữ liệu danh bạ. Hàm \texttt{ghiFile()} duyệt danh sách và ghi tên, số điện thoại của từng liên hệ ra tệp. Hàm \texttt{docFile()} đọc lần lượt hai dòng tương ứng với tên và số điện thoại, sau đó tạo nút mới bằng hàm them\texttt{LienHe}().\par
+Phương pháp này có ưu điểm là đơn giản, dễ kiểm tra nội dung tệp và phù hợp với chương trình quy mô nhỏ. Tuy nhiên, định dạng lưu trữ phụ thuộc vào việc mỗi trường dữ liệu nằm trên một dòng riêng. Nếu tên hoặc số điện thoại chứa ký tự xuống dòng, việc đọc dữ liệu có thể bị sai lệch.\par
+Ngoài ra, hàm \texttt{docFile()} hiện bổ sung dữ liệu đọc được vào danh bạ đang có, chưa tự động xóa dữ liệu cũ hoặc kiểm tra các liên hệ trùng lặp. Vì vậy, khi sử dụng chương trình, cần chú ý trạng thái danh bạ trước khi thực hiện thao tác đọc tệp.\par
+\begin{table}[htbp]\centering\caption{Tổng hợp cấu trúc dữ liệu và thuật toán được sử dụng}\label{tab:cautruc}
+\small\begin{tabularx}{\textwidth}{|p{3cm}|p{4cm}|X|}\hline\textbf{Yêu cầu} & \textbf{Cấu trúc dữ liệu hoặc thuật toán} & \textbf{Lý do lựa chọn} \\ \hline
+Yêu cầu & Cấu trúc dữ liệu hoặc thuật toán & Lý do lựa chọn \\ \hline
+Quản lý danh bạ & Danh sách liên kết kép & Hỗ trợ duyệt hai chiều, thêm cuối và xóa nút theo liên kết. \\ \hline
+Quản lý lịch sử cuộc gọi & Danh sách liên kết đơn & Đơn giản, phù hợp với thao tác chèn bản ghi mới vào đầu danh sách. \\ \hline
+Thêm liên hệ & Chèn cuối danh sách liên kết kép & Sử dụng con trỏ tail để thêm nút mới. \\ \hline
+Xóa liên hệ & Tìm tuần tự kết hợp cập nhật liên kết & Xác định nút theo số điện thoại rồi điều chỉnh các con trỏ liên quan. \\ \hline
+Sắp xếp danh bạ & Bubble Sort & Dễ cài đặt và minh họa thuật toán sắp xếp trên danh sách liên kết. \\ \hline
+Tìm kiếm theo tiền tố tên & Duyệt tuần tự kết hợp string::find() & Kiểm tra lần lượt từng tên để xác định các kết quả phù hợp. \\ \hline
+Duyệt danh bạ & Con trỏ next và prev & Cho phép hiển thị danh bạ theo chiều xuôi và chiều ngược. \\ \hline
+\end{tabularx}\end{table}
+
+- Các cấu trúc dữ liệu và thuật toán trên là phương án đã được sử dụng trong mã nguồn hiện tại. Trong quá trình phát triển, chương trình có thể được mở rộng để hỗ trợ cập nhật liên hệ, tìm kiếm theo số điện thoại, kiểm tra dữ liệu trùng lặp, lưu lịch sử cuộc gọi vào tệp và giới hạn số lượng bản ghi. Những nội dung này thuộc định hướng cải tiến, chưa phải chức năng đã hoàn thành.\par
+\section{TỔNG KẾT CHƯƠNG}
+
+Chương 1 đã giới thiệu bài toán xây dựng phần mềm quản lý danh bạ điện thoại và lịch sử cuộc gọi, xác định tác nhân sử dụng hệ thống, phân tích các yêu cầu chức năng và phi chức năng, đồng thời trình bày cơ sở lựa chọn cấu trúc dữ liệu và thuật toán.\par
+Theo mã nguồn hiện tại, danh bạ được quản lý bằng danh sách liên kết kép, cho phép thêm liên hệ, xóa theo số điện thoại, sắp xếp theo tên bằng thuật toán Bubble Sort, tìm kiếm theo tiền tố tên và duyệt theo hai chiều. Lịch sử cuộc gọi được quản lý bằng danh sách liên kết đơn, ghi nhận số điện thoại do người dùng nhập và đặt bản ghi mới nhất ở đầu danh sách. Dữ liệu danh bạ có thể được đọc từ và ghi vào tệp \texttt{danhba.txt}.\par
+Bên cạnh các chức năng đã triển khai, chương trình vẫn còn một số hạn chế như chưa cập nhật thông tin liên hệ, chưa tìm kiếm theo số điện thoại độc lập, chưa lưu các thông tin chi tiết của cuộc gọi và chưa lưu lịch sử cuộc gọi vào tệp. Việc xác định rõ những hạn chế này giúp đảm bảo tính chính xác của báo cáo và tạo cơ sở cho việc đề xuất các hướng phát triển tiếp theo.\par
+Những nội dung đã phân tích trong chương là cơ sở để trình bày thiết kế chương trình, mô tả các hàm xử lý, phân tích thuật toán và đánh giá kết quả cài đặt ở các chương tiếp theo.\par
+\end{document}
